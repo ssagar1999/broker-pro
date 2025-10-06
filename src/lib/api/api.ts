@@ -2,13 +2,16 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api',
+//   baseURL: process.env.NEXT_PUBLIC_BASE_URL +'api' || 'http://localhost:8000/api',
+  baseURL: 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 });
 
 export const apiRequest = async (endpoint: string, method: string = 'GET', data: any = null) => {
+    console.log(endpoint)
   try {
     const response = await apiClient({
       url: endpoint,

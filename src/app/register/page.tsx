@@ -18,6 +18,7 @@ import { toast } from "react-hot-toast"  // Optional for success and error messa
 import axios from "axios"  // Import axios for API calls
 import { registerUser } from "../../lib/api/userApi"; 
 
+
 export default function RegisterPageUI() {
   const [formData, setFormData] = useState({
     username: "",
@@ -28,6 +29,8 @@ export default function RegisterPageUI() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")  // For handling error messages
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,6 +144,14 @@ export default function RegisterPageUI() {
                 required
               />
             </div>
+
+
+   <div className="space-y-2">
+            
+           
+            </div>
+
+
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

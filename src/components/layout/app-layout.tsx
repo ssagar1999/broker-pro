@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Building2, Home, Plus, List, Settings, Bell, MessageSquare, Cloud, User } from "lucide-react"
 
 const navigation = [
-  { name: "Home", href: "/dashboard", icon: Home },
+  { name: "Home", href: "/", icon: Home },
   { name: "Add Data", href: "/add", icon: Plus },
   { name: "View Data", href: "/list", icon: List },
 ]
@@ -29,7 +29,7 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
       <Sidebar>
         {/* Sidebar Header */}
         <SidebarHeader className="border-b p-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="flex items-center justify-center rounded-lg bg-primary p-2">
               <Building2 className="text-primary-foreground" />
             </div>

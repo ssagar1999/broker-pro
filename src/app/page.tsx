@@ -8,8 +8,42 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"  // ShadCN Select
 import { AlertCircle, CheckCircle } from "lucide-react" // For icons
 import Link from "next/link" // Next.js Link
+import { loginUser } from "../lib/api/userApi";
+import { useState } from "react"
+import  useUserStore  from "../lib/store/userStore"; // Import Zustand store
 
 export default function Home() {
+  const [formData, setFormData] = useState({
+    emailOrphone: "",
+    password: "",
+  })
+
+  const setUserId = useUserStore(state => state.setUserId);
+  const setUserToken = useUserStore(state => state.setUserToken);
+  const setIsAuthenticated = useUserStore(state => state.setIsAuthenticated);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+  
+  const handleSubmit = async (e: React.FormEvent) => {  
+    e.preventDefault();
+
+    try {
+      const response = await loginUser(formData);
+      setUserId(response.userId); // Store userId in Zustand store
+      setUserToken(response.token);
+      setIsAuthenticated(true);
+      localStorage.setItem("authToken", response.token);
+      console.log("Login response:", response);
+      // Handle successful login
+    } catch (error) {
+      console.error("Login error:", error);
+      // Handle login error
+    } 
+  }
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Left side with illustration */}
@@ -44,7 +78,7 @@ export default function Home() {
             <h2 className="text-xl text-gray-600">Welcome to Lovebirds</h2>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Error message placeholder */}
             <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive hidden">
               <AlertCircle className="h-4 w-4" />
@@ -55,17 +89,18 @@ export default function Home() {
             <div className="flex items-center gap-2 rounded-md bg-accent/10 p-3 text-sm text-accent hidden">
               <CheckCircle className="h-4 w-4" />
               <span>Data saved successfully! Redirecting...</span>
+           
             </div>
 
             {/* Form Inputs */}
             <div className="space-y-2">
-              <Label htmlFor="email">Username or Email</Label>
-              <Input id="email" placeholder="John Smith" />
+              <Label htmlFor="email">Phone Number or Email</Label>
+              <Input id="email" placeholder="John Smith" name="emailOrphone"  onChange={handleChange}/>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" />
+              <Input id="password" type="password" placeholder="••••••••" name="password" onChange={handleChange}/>
               <div className="text-right">
                 <Link href="#" className="text-sm text-gray-500 hover:text-gray-700">
                   Forgot password?
@@ -97,6 +132,9 @@ export default function Home() {
               New Lovebirds?{" "}
               <Link href="/register" className="text-gray-600 hover:text-gray-800">
                 Create Account
+              </Link>
+                    <Link href="/add-property" className="font-medium text-primary hover:underline">
+                go to add propert
               </Link>
             </p>
           </form>
