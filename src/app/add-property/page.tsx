@@ -76,7 +76,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 
   setLoading(true);
-  let imageUrls = []; // Array to store URLs of uploaded images
+  const imageUrls = []; // Array to store URLs of uploaded images
 
   try {
     // Initialize S3 SDK with environment variables (safe way to load credentials)
@@ -110,6 +110,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       ...formData,
       coordinates: location,
       imageUrls: imageUrls, // Save the image URLs from S3
+      images: imageUrls, // Add the required 'images' property
       category: 'sale', // Example category
       brokerId: process.env.NEXT_PUBLIC_BROKERID || "68e29be01cc7a9a6eed56cfb", // Example broker ID
     };

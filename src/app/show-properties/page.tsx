@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AppLayout } from "../../components/layout/app-layout";
-import { getUserData, deleteData, type BrokerData } from "../../lib/data";
+import { type BrokerData } from "../../lib/api/types";
 import { Trash2, MapPin, Calendar, Search, SlidersHorizontal, Heart, Star, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -105,7 +105,7 @@ export default function ListDataPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this entry?")) {
       try {
-        await deleteData(id);
+        // await deleteData(id);
         setData(data.filter((item) => item._id !== id));
         setFilteredData(filteredData.filter((item) => item._id !== id));
       } catch (error) {
@@ -218,7 +218,7 @@ export default function ListDataPage() {
                               <Checkbox
                                 id={`status-${status}`}
                                 checked={selectedStatuses.includes(status)}
-                                onCheckedChange={() => toggleStatusFilter(status)}
+                                // onCheckedChange={() => toggleStatusFilter(status)}
                               />
                               <label
                                 htmlFor={`status-${status}`}
@@ -241,7 +241,7 @@ export default function ListDataPage() {
                                 <Checkbox
                                   id={`type-${type}`}
                                   checked={selectedPropertyTypes.includes(type)}
-                                  onCheckedChange={() => togglePropertyTypeFilter(type)}
+                                  // onCheckedChange={() => togglePropertyTypeFilter(type)}
                                 />
                                 <label
                                   htmlFor={`type-${type}`}
