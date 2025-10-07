@@ -38,6 +38,7 @@ export default function ListDataPage() {
       setLoading(true); // Start loading
       try {
         const properties = await getAllProperties({ brokerId: userId });
+        
         setData(properties);
         setFilteredData(properties);
       } catch (error) {
