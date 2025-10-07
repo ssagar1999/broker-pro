@@ -16,7 +16,7 @@ export interface PropertyFormData {
   floors: number;
   furnishing: string;
   price: number;
-  status: "active" | "pending" | "closed";
+  status: "available" | "booked" | "unavailable";
   notes: string;
 }
 
@@ -64,7 +64,7 @@ export function generateRandomProperty() {
     floors: 1 + Math.floor(Math.random() * 5),
     furnishing,
     price: 500000 + Math.floor(Math.random() * 5000000),
-    status: "active",
+    status: "available",
     notes: "Auto-generated property for testing."
   };
 

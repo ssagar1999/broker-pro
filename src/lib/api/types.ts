@@ -14,6 +14,7 @@ export interface BrokerData {
   area: number;
   floors: number;
   furnishing: string;
+  images: string[];
   pincode: string;
   notes?: string;
   createdAt: string;

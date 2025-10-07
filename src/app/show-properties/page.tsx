@@ -29,10 +29,12 @@ export default function ListDataPage() {
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const userId = useUserStore((state) => state.userId);
   const [loading, setLoading] = useState(false); // For loading state
+     console.log('no of times page rendered');
 
   // Fetch properties based on the userId
   useEffect(() => {
     const fetchData = async () => {
+      console.log(userId, 'render times');
       setLoading(true); // Start loading
       try {
         const properties = await getAllProperties({ brokerId: userId });
@@ -341,7 +343,7 @@ export default function ListDataPage() {
                 {filteredData.map((item) => (
                   <Card key={item._id} className="group relative overflow-hidden transition-shadow hover:shadow-lg">
                     {/* Property Image Placeholder */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5">
+                    <div style={{ backgroundImage: `url(${item.images[0]})` }} className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5">
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center">
                           <MapPin className="mx-auto mb-2 h-12 w-12 text-muted-foreground/30" />

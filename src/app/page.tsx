@@ -10,6 +10,7 @@ import { AlertCircle, CheckCircle } from "lucide-react" // For icons
 import Link from "next/link" // Next.js Link
 import { loginUser } from "../lib/api/userApi";
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import  useUserStore  from "../lib/store/userStore"; // Import Zustand store
 
 export default function Home() {
@@ -17,8 +18,9 @@ export default function Home() {
     emailOrphone: "",
     password: "",
   })
-
+  const router = useRouter();
   const setUserId = useUserStore(state => state.setUserId);
+
   const setUserToken = useUserStore(state => state.setUserToken);
   const setIsAuthenticated = useUserStore(state => state.setIsAuthenticated);
 
@@ -36,6 +38,7 @@ export default function Home() {
       setUserToken(response.token);
       setIsAuthenticated(true);
       localStorage.setItem("authToken", response.token);
+      router.push("/show-properties"); // Redirect to dashboard or another protected route
       console.log("Login response:", response);
       // Handle successful login
     } catch (error) {

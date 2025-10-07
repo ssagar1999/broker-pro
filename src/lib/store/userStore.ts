@@ -38,7 +38,7 @@ const useUserStore = create<Store>((set, get) => ({
     sortBy: 'recent',
 
     // Action to set the userId
-  userId: '',  // Initial userId value
+  userId: typeof window !== 'undefined' ? localStorage.getItem('userId'): '',  // Initial userId value
   userToken: '',  // Initial userToken value
   isAuthenticated: typeof window !== 'undefined' ? localStorage.getItem('isAuthenticated') === 'true' : false,  // Initial auth status from localStorage    
 

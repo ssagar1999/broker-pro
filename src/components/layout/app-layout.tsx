@@ -63,8 +63,8 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
               <AvatarFallback className="bg-primary text-xs text-primary-foreground">DU</AvatarFallback>
             </Avatar>
             <div className="flex flex-1 flex-col overflow-hidden">
-              <span className="truncate text-sm font-medium">Demo User</span>
-              <span className="truncate text-xs text-muted-foreground">Pro</span>
+              <span className="truncate text-sm font-medium"> User</span>
+              {/* <span className="truncate text-xs text-muted-foreground">Pro</span> */}
             </div>
           </div>
         </SidebarFooter>

@@ -13,10 +13,11 @@ export const addProperty = async (propertyData: {
     landmark: string,
     area: number,
     floors: number,
+    images: string[],
     furnishing: string,
     pincode: string,
     price: number,
-    status: "active" | "pending" | "closed",
+    status: "available" | "booked" | "unavailable",
     notes: string
 }) => {
     return apiRequest('/properties/add', 'POST', propertyData);
