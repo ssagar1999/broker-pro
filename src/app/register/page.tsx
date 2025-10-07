@@ -68,11 +68,18 @@ export default function RegisterPageUI() {
         password: "",
         confirmPassword: "",
       })
-    } catch (error: any) {
-      console.error(error.response?.data || error.message)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
       // Show the error message
-      toast.error(error.response?.data?.message || "Registration failed")
-      setError(error.response?.data?.message || "Something went wrong!")
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Registration failed"
+        : "An unexpected error occurred";
+      toast.error(errorMessage);
+
     } finally {
       setLoading(false)
     }

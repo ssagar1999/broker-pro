@@ -11,7 +11,7 @@ const apiClient = axios.create({
   withCredentials: true
 });
 
-export const apiRequest = async (endpoint: string, method: string = 'GET', data: any = null) => {
+export const apiRequest = async (endpoint: string, method: string = 'GET', data: object) => {
     console.log(endpoint)
   try {
     const response = await apiClient({

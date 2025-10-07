@@ -10,9 +10,9 @@ export const loginUser = async (credentials: { emailOrphone: string; password: s
   return apiRequest('/users/login', 'POST', credentials);
 };
 
-export const getUserData = async (userId: string) => {
-  return apiRequest(`/users/${userId}`, 'GET');
-};
+// export const getUserData = async (userId: string) => {
+//   return apiRequest(`/users/${userId}`, 'GET');
+// };
 
 
 
