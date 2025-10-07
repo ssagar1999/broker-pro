@@ -5,7 +5,7 @@ import type { BrokerData } from '@/lib/api/types';
 
 
 interface Store {
-    userId: string;
+    userId: string | null;
     userToken: string;
     isAuthenticated: boolean;
 
@@ -81,8 +81,8 @@ const useUserStore = create<Store>((set, get) => ({
     setSearchQuery: (query) => set({ searchQuery: query }),
     setSortBy: (sort) => set({ sortBy: sort }),
     removeProperty: (id) => set({
-        properties: get().properties.filter((item) => item.id !== id),
-        filteredProperties: get().filteredProperties.filter((item) => item.id !== id),
+        properties: get().properties.filter((item) => item._id !== id),
+        filteredProperties: get().filteredProperties.filter((item) => item._id !== id),
     }),
 }));
 
