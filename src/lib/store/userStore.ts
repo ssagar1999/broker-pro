@@ -17,15 +17,16 @@ interface Store {
 
     // Actions
 
-
+    setUserId: (userId: string) => void;
     setUserToken: (userToken: string) => void;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
     setProperties: (data: BrokerData[]) => void;
     setFilteredProperties: (data: BrokerData[]) => void;
     toggleFavorite: (id: string) => void;
     setSearchQuery: (query: string) => void;
     setSortBy: (sort: string) => void;
     removeProperty: (id: string) => void;
-      checkAuth: () => Promise<void>;
+    
 }
 
 const useUserStore = create<Store>((set, get) => ({
@@ -59,14 +60,6 @@ const useUserStore = create<Store>((set, get) => ({
       localStorage.setItem('isAuthenticated', String(isAuthenticated));  // Store in localStorage
     }
     set({ isAuthenticated });
-  },
-   checkAuth: async () => {
-    try {
-      const data = await apiRequest('/auth/me', 'GET'); // backend route to verify JWT
-      set({  userId: data.id, userToken: data.token, isAuthenticated: true });
-    } catch {
-      set({  isAuthenticated: false });
-    }
   },
   logout: () => {
     if (typeof window !== 'undefined') {

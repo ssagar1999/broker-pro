@@ -22,6 +22,6 @@ export const addProperty = async (propertyData: {
     return apiRequest('/properties/add', 'POST', propertyData);
 };
 
-export const getAllProperties = async () => {
-    return apiRequest('/properties', 'GET');
+export const getAllProperties = async ({ brokerId }: { brokerId: string }) => {
+  return apiRequest('/properties/getProperties', 'POST', { brokerId });
 };

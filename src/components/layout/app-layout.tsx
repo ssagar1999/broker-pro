@@ -12,8 +12,8 @@ import { Building2, Home, Plus, List, Settings, Bell, MessageSquare, Cloud, User
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Add Data", href: "/add", icon: Plus },
-  { name: "View Data", href: "/list", icon: List },
+  { name: "Add Data", href: "/add-property", icon: Plus },
+  { name: "View Data", href: "/show-properties", icon: List },
 ]
 
 interface AppLayoutProps {

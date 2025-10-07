@@ -13,7 +13,7 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"; // optional toast notifications
 import { addProperty } from "../../lib/api/propertiesApi";
 import { generateRandomProperty } from "./generaterandomproperty";
-import ProtectedRoute from '../../components/protected-route.tsx/protected-route';
+
 
 
 // inside your component
@@ -235,9 +235,9 @@ export default function AddDataPageUI() {
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="booked">Booked</SelectItem>
+                        <SelectItem value="unavailable">UNavailable</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

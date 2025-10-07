@@ -1,143 +1,156 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import  { AppLayout }  from "../../components/layout/app-layout"
-import { getUserData, deleteData, type BrokerData } from "../../lib/data"
-import { Trash2, MapPin, Calendar, Search, SlidersHorizontal, Heart, Star, X } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { getStatusColor, formatPrice, formatDate } from "@/lib/utils" // Importing missing functions
-import ProtectedRoute from '../../components/protected-route.tsx/protected-route';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { AppLayout } from "../../components/layout/app-layout";
+import { getUserData, deleteData, type BrokerData } from "../../lib/data";
+import { Trash2, MapPin, Calendar, Search, SlidersHorizontal, Heart, Star, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { getStatusColor, formatPrice, formatDate } from "@/lib/utils";
+import useUserStore from "../../lib/store/userStore";
+import { getAllProperties } from "@/lib/api/propertiesApi";
 
 export default function ListDataPage() {
-  const router = useRouter()
-  const [data, setData] = useState<BrokerData[]>([])
-  const [filteredData, setFilteredData] = useState<BrokerData[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState("recent")
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
-  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([])
-  const [priceRange, setPriceRange] = useState({ min: "", max: "" })
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
-  const userId = "demo-user"
+  const router = useRouter();
+  const [data, setData] = useState<BrokerData[]>([]);
+  const [filteredData, setFilteredData] = useState<BrokerData[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const userId = useUserStore((state) => state.userId);
+  const [loading, setLoading] = useState(false); // For loading state
 
+  // Fetch properties based on the userId
   useEffect(() => {
-    const userData = getUserData(userId)
-    setData(userData)
-    setFilteredData(userData)
-  }, [])
+    const fetchData = async () => {
+      setLoading(true); // Start loading
+      try {
+        const properties = await getAllProperties({ brokerId: userId });
+        setData(properties);
+        setFilteredData(properties);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false); // End loading
+      }
+    };
 
+    fetchData();
+  }, [userId]);
+
+  // Filtering logic
   useEffect(() => {
-    let result = [...data]
+    let result = [...data];
 
     // Search filter
     if (searchQuery) {
       result = result.filter(
         (item) =>
           item.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.propertyType.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+          item.location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.propertyType.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
     // Status filter
     if (selectedStatuses.length > 0) {
-      result = result.filter((item) => selectedStatuses.includes(item.status))
+      result = result.filter((item) => selectedStatuses.includes(item.isActive));
     }
 
     // Property type filter
     if (selectedPropertyTypes.length > 0) {
-      result = result.filter((item) => selectedPropertyTypes.includes(item.propertyType))
+      result = result.filter((item) => selectedPropertyTypes.includes(item.propertyType));
     }
 
     // Price range filter
     if (priceRange.min) {
-      result = result.filter((item) => item.price >= Number(priceRange.min))
+      result = result.filter((item) => item.price >= Number(priceRange.min));
     }
     if (priceRange.max) {
-      result = result.filter((item) => item.price <= Number(priceRange.max))
+      result = result.filter((item) => item.price <= Number(priceRange.max));
     }
 
     // Sorting
     switch (sortBy) {
       case "price-low":
-        result.sort((a, b) => a.price - b.price)
-        break
+        result.sort((a, b) => a.price - b.price);
+        break;
       case "price-high":
-        result.sort((a, b) => b.price - a.price)
-        break
+        result.sort((a, b) => b.price - a.price);
+        break;
       case "recent":
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        break
+        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
       case "oldest":
-        result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-        break
+        result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
     }
 
-    setFilteredData(result)
-  }, [data, searchQuery, sortBy, selectedStatuses, selectedPropertyTypes, priceRange])
+    setFilteredData(result);
+  }, [data, searchQuery, sortBy, selectedStatuses, selectedPropertyTypes, priceRange]);
 
-  const handleDelete = (id: string) => {
+  // Handle delete
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this entry?")) {
-      deleteData(id)
-      setData(data.filter((item) => item.id !== id))
+      try {
+        await deleteData(id);
+        setData(data.filter((item) => item._id !== id));
+        setFilteredData(filteredData.filter((item) => item._id !== id));
+      } catch (error) {
+        console.error("Error deleting property:", error);
+      }
     }
-  }
+  };
 
+  // Handle favorite toggle
   const toggleFavorite = (id: string) => {
     setFavorites((prev) => {
-      const newFavorites = new Set(prev)
+      const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
-        newFavorites.delete(id)
+        newFavorites.delete(id);
       } else {
-        newFavorites.add(id)
+        newFavorites.add(id);
       }
-      return newFavorites
-    })
-  }
-
-  const toggleStatusFilter = (status: string) => {
-    setSelectedStatuses((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]))
-  }
-
-  const togglePropertyTypeFilter = (type: string) => {
-    setSelectedPropertyTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]))
-  }
+      return newFavorites;
+    });
+  };
 
   const clearFilters = () => {
-    setSearchQuery("")
-    setSelectedStatuses([])
-    setSelectedPropertyTypes([])
-    setPriceRange({ min: "", max: "" })
-  }
+    setSearchQuery("");
+    setSelectedStatuses([]);
+    setSelectedPropertyTypes([]);
+    setPriceRange({ min: "", max: "" });
+  };
 
   const removeStatusFilter = (status: string) => {
-    setSelectedStatuses((prev) => prev.filter((s) => s !== status))
-  }
+    setSelectedStatuses((prev) => prev.filter((s) => s !== status));
+  };
 
   const removePropertyTypeFilter = (type: string) => {
-    setSelectedPropertyTypes((prev) => prev.filter((t) => t !== type))
-  }
+    setSelectedPropertyTypes((prev) => prev.filter((t) => t !== type));
+  };
 
   const clearPriceRange = () => {
-    setPriceRange({ min: "", max: "" })
-  }
+    setPriceRange({ min: "", max: "" });
+  };
 
   const activeFilterCount =
-    selectedStatuses.length + selectedPropertyTypes.length + (priceRange.min || priceRange.max ? 1 : 0)
+    selectedStatuses.length + selectedPropertyTypes.length + (priceRange.min || priceRange.max ? 1 : 0);
 
-  const uniquePropertyTypes = Array.from(new Set(data.map((item) => item.propertyType)))
+  const uniquePropertyTypes = Array.from(new Set(data.map((item) => item.propertyType)));
 
   return (
-         
-                <AppLayout title="list Data" description="these are places available">
+    <AppLayout title="list Data" description="These are places available">
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="mb-6">
@@ -148,7 +161,7 @@ export default function ListDataPage() {
                   Showing {filteredData.length} of {data.length} properties
                 </p>
               </div>
-              <Button onClick={() => router.push("/dashboard/add")}>Add New Property</Button>
+              <Button onClick={() => router.push("/add-property")}>Add New Property</Button>
             </div>
 
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -315,7 +328,7 @@ export default function ListDataPage() {
                     {data.length === 0 ? "No properties yet" : "No properties match your filters"}
                   </p>
                   {data.length === 0 ? (
-                    <Button onClick={() => router.push("/dashboard/add")}>Add Your First Property</Button>
+                    <Button onClick={() => router.push("/add-property")}>Add Your First Property</Button>
                   ) : (
                     <Button variant="outline" onClick={clearFilters}>
                       Clear Filters
@@ -326,7 +339,7 @@ export default function ListDataPage() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filteredData.map((item) => (
-                  <Card key={item.id} className="group relative overflow-hidden transition-shadow hover:shadow-lg">
+                  <Card key={item._id} className="group relative overflow-hidden transition-shadow hover:shadow-lg">
                     {/* Property Image Placeholder */}
                     <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5">
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -338,20 +351,20 @@ export default function ListDataPage() {
 
                       {/* Favorite Badge */}
                       <button
-                        onClick={() => toggleFavorite(item.id)}
+                        onClick={() => toggleFavorite(item._id)}
                         className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm transition-colors hover:bg-white"
                       >
                         <Heart
                           className={`h-4 w-4 ${
-                            favorites.has(item.id) ? "fill-red-500 text-red-500" : "text-slate-600"
+                            favorites.has(item._id) ? "fill-red-500 text-red-500" : "text-slate-600"
                           }`}
                         />
                       </button>
 
                       {/* Status Badge */}
                       <div className="absolute left-3 top-3">
-                        <Badge className={getStatusColor(item.status)} variant="secondary">
-                          {item.status}
+                        <Badge className={getStatusColor(item.isActive)} variant="secondary">
+                          {item.isActive}
                         </Badge>
                       </div>
                     </div>
@@ -359,7 +372,7 @@ export default function ListDataPage() {
                     <CardContent className="p-4">
                       <div className="mb-2 flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <h3 className="font-semibold leading-tight text-foreground">{item.clientName}</h3>
+                          <h3 className="font-semibold leading-tight text-foreground">{item.owner.name}</h3>
                           <p className="text-sm text-muted-foreground">{item.propertyType}</p>
                         </div>
                         <div className="flex items-center gap-1 text-xs">
@@ -370,7 +383,7 @@ export default function ListDataPage() {
 
                       <div className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" />
-                        <span className="line-clamp-1">{item.location}</span>
+                        <span className="line-clamp-1">{item.location.address}</span>
                       </div>
 
                       <div className="mb-3 flex items-baseline gap-1">
@@ -393,7 +406,7 @@ export default function ListDataPage() {
                           variant="ghost"
                           size="sm"
                           className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => handleDelete(item._id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -406,7 +419,6 @@ export default function ListDataPage() {
           </div>
         </main>
       </div>
-                </AppLayout>
-          
-  )
+    </AppLayout>
+  );
 }

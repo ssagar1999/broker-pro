@@ -1,12 +1,20 @@
 // lib/api/types.ts
 
 export interface BrokerData {
-  id: string;
+  _id: string;
   clientName: string;
   propertyType: string;
-  location: string;
+  location: {
+    address: string; district: string; locality: string; landmark: string
+  };
   price: number;
-  status: 'active' | 'pending' | 'closed';
+  isActive: 'active' | 'pending' | 'closed';
+  owner:{ name: string; contact: string};
+  rooms: string;
+  area: number;
+  floors: number;
+  furnishing: string;
+  pincode: string;
   notes?: string;
   createdAt: string;
 }
