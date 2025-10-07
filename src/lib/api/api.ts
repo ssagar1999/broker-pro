@@ -20,8 +20,11 @@ export const apiRequest = async (endpoint: string, method: string = 'GET', data:
       data,
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
-    throw new Error(error.response?.data?.message || 'Something went wrong!');
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || 'Something went wrong!');
+    }
+    throw new Error('Something went wrong!');
   }
 };
