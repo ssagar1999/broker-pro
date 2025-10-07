@@ -77,8 +77,8 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center p-8 w-full lg:w-1/2">
         <div className="w-full max-w-sm space-y-8">
           <div className="text-center">
-            <h1 className="text-2xl font-script mb-6">Lovebirds</h1>
-            <h2 className="text-xl text-gray-600">Welcome to Lovebirds</h2>
+            <h1 className="text-2xl font-script mb-6">auto broket</h1>
+            <h2 className="text-xl text-gray-600">Welcome to auto broker</h2>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
