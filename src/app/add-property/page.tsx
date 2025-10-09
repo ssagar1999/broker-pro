@@ -13,6 +13,7 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"; // optional toast notifications
 import { addProperty } from "../../lib/api/propertiesApi";
 import { generateRandomProperty } from "./generaterandomproperty";
+import { rooms } from "@/lib/data/data"
 import AWS from 'aws-sdk';
 
 
@@ -42,6 +43,7 @@ export default function AddDataPageUI() {
     locality: "",
     landmark: "",
     pincode: '',
+    rooms: '',
     area: 0,
     floors: 0,
     furnishing: '',
@@ -54,104 +56,104 @@ export default function AddDataPageUI() {
   const [loading, setLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
-const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files) {
-    setImageFiles(Array.from(e.target.files));
-  }
-};
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(Array.from(e.target.files));
+    }
+  };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
 
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
 
-  // Check if required fields are filled out
-  if (!formData.ownerName || !formData.propertyType || !formData.price || !location) {
-    toast.error("Please fill all required fields and set the location on the map.");
-    return;
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  setLoading(true);
-  const imageUrls = []; // Array to store URLs of uploaded images
+    // Check if required fields are filled out
+    if (!formData.ownerName || !formData.propertyType || !formData.price || !location) {
+      toast.error("Please fill all required fields and set the location on the map.");
+      return;
+    }
 
-  try {
-    // Initialize S3 SDK with environment variables (safe way to load credentials)
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
-      secretAccessKey: 'ONzLPbcYzgUXhhgwL7rHwJDF8fsfVDgN4jhh8kFH',
-      region: 'us-east-1', // Change to your bucket's region
-    });
+    setLoading(true);
+    const imageUrls = []; // Array to store URLs of uploaded images
 
-    // Loop through the selected images and upload each to S3
-    for (let i = 0; i < imageFiles.length; i++) {
-      const file = imageFiles[i];
+    try {
+      // Initialize S3 SDK with environment variables (safe way to load credentials)
+      const s3 = new AWS.S3({
+        accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
+        secretAccessKey: 'ONzLPbcYzgUXhhgwL7rHwJDF8fsfVDgN4jhh8kFH',
+        region: 'us-east-1', // Change to your bucket's region
+      });
 
-      const params = {
-        Bucket: "propertiesimages", // Set the S3 bucket name
-        Key: `properties/${Date.now()}_${file.name}`, // Generate a unique file name
-        Body: file,
-        ContentType: file.type,
-  
+      // Loop through the selected images and upload each to S3
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+
+        const params = {
+          Bucket: "propertiesimages", // Set the S3 bucket name
+          Key: `properties/${Date.now()}_${file.name}`, // Generate a unique file name
+          Body: file,
+          ContentType: file.type,
+
+        };
+
+        // Upload the file to S3
+        const uploadResult = await s3.upload(params).promise();
+        imageUrls.push(uploadResult.Location); // Store the S3 URL
+
+        console.log(`${file.name} uploaded successfully!`);
+      }
+
+      // Combine the form data with location and image URLs
+      const propertyData = {
+        ...formData,
+        coordinates: location,
+        imageUrls: imageUrls, // Save the image URLs from S3
+        images: imageUrls, // Add the required 'images' property
+        category: 'sale', // Example category
+        brokerId: process.env.NEXT_PUBLIC_BROKERID || "68e29be01cc7a9a6eed56cfb", // Example broker ID
       };
 
-      // Upload the file to S3
-      const uploadResult = await s3.upload(params).promise();
-      imageUrls.push(uploadResult.Location); // Store the S3 URL
+      // Call the API to save property data to MongoDB
+      const response = await addProperty(propertyData);
+      toast.success("Property added successfully!");
+      console.log("Property response:", response);
 
-      console.log(`${file.name} uploaded successfully!`);
+      // Reset the form after successful submission
+      setFormData({
+        ownerName: "",
+        ownerContact: "",
+        propertyType: "",
+        rooms: '',
+        address: "",
+        district: "",
+        locality: "",
+        landmark: "",
+        pincode: '',
+        area: 0,
+        floors: 0,
+        furnishing: '',
+        price: 0,
+        status: "available" as "available" | "booked" | "unavailable",
+        notes: ""
+      });
+      setLocation(null);
+      setImageFiles([]); // Clear the selected image files
+
+    } catch (err) {
+      console.error('Error:', err);
+      if (err instanceof Error) {
+        toast.error(err.message || "Failed to create property.");
+      } else {
+        toast.error("Failed to create property.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    // Combine the form data with location and image URLs
-    const propertyData = {
-      ...formData,
-      coordinates: location,
-      imageUrls: imageUrls, // Save the image URLs from S3
-      images: imageUrls, // Add the required 'images' property
-      category: 'sale', // Example category
-      brokerId: process.env.NEXT_PUBLIC_BROKERID || "68e29be01cc7a9a6eed56cfb", // Example broker ID
-    };
-
-    // Call the API to save property data to MongoDB
-    const response = await addProperty(propertyData);
-    toast.success("Property added successfully!");
-    console.log("Property response:", response);
-
-    // Reset the form after successful submission
-    setFormData({
-    ownerName: "",
-    ownerContact: "",
-    propertyType: "",
-    rooms: '',
-    address: "",
-    district: "",
-    locality: "",
-    landmark: "",
-    pincode: '',
-    area: 0,
-    floors: 0,
-    furnishing: '',
-    price: 0,
-    status: "available" as "available" | "booked" | "unavailable",
-    notes: ""
-  });
-    setLocation(null);
-    setImageFiles([]); // Clear the selected image files
-
-  } catch (err) {
-    console.error('Error:', err);
-    if (err instanceof Error) {
-      toast.error(err.message || "Failed to create property.");
-    } else {
-      toast.error("Failed to create property.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
 
@@ -166,9 +168,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   return (
-    
 
-  <AppLayout title="Add New Data" description="Create a new entry for your broker records">
+
+    <AppLayout title="Add New Data" description="Create a new entry for your broker records">
 
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-2">
@@ -228,10 +230,40 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="rooms">Rooms</Label>
+                      <Select name="rooms" onValueChange={(val) => setFormData(prev => ({ ...prev, rooms: val }))} value={formData.rooms}>
+                        <SelectTrigger id="rooms">
+                          <SelectValue placeholder="Select rooms" />
+                        </SelectTrigger>
+                        <SelectContent>
+
+                          {rooms.map((room) => (
+                            <SelectItem key={room} value={room}>
+                              {room}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Status</Label>
+                      <Select name="status" onValueChange={(val) => setFormData(prev => ({ ...prev, status: val as "available" | "booked" | "unavailable" }))} value={formData.status}>
+                        <SelectTrigger id="status">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="available">Available</SelectItem>
+                          <SelectItem value="booked">Booked</SelectItem>
+                          <SelectItem value="unavailable">UNavailable</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="furnishing">Furnishing <span className="text-destructive">*</span></Label>
                       <Input id="furnishing" name='furnishing' placeholder="semi-furnished" value={formData.furnishing} onChange={handleChange} />
                     </div>
-
 
 
                     <div className="space-y-2">
@@ -275,30 +307,19 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select name="status" onValueChange={(val) => setFormData(prev => ({ ...prev, status: val as "available" | "booked" | "unavailable" }))} value={formData.status}>
-                      <SelectTrigger id="status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="available">Available</SelectItem>
-                        <SelectItem value="booked">Booked</SelectItem>
-                        <SelectItem value="unavailable">UNavailable</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+
+
 
                   <div className="space-y-2">
-  <Label htmlFor="image">Property Image</Label>
-  <Input
-    id="image"
-    name="image"
-    type="file"
-    onChange={handleImageChange} // Handle image upload
-    multiple
-  />
-</div>
+                    <Label htmlFor="image">Property Image</Label>
+                    <Input
+                      id="image"
+                      name="image"
+                      type="file"
+                      onChange={handleImageChange} // Handle image upload
+                      multiple
+                    />
+                  </div>
 
                   <div className="space-y-2">
                     <Label>Property Location on Map</Label>
@@ -322,9 +343,11 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </main>
       </div>
-    </AppLayout>
 
       
+    </AppLayout>
+
+
   )
 }
 
