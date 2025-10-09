@@ -14,7 +14,6 @@ interface Store {
     favorites: Set<string>;
     searchQuery: string;
     sortBy: string;
-    isLoading: boolean;
 
     // Actions
 
@@ -27,7 +26,6 @@ interface Store {
     setSearchQuery: (query: string) => void;
     setSortBy: (sort: string) => void;
     removeProperty: (id: string) => void;
-    setIsLoading: (isLoading: boolean) => void;
     
 }
 
@@ -38,7 +36,6 @@ const useUserStore = create<Store>((set, get) => ({
     favorites: new Set(),
     searchQuery: '',
     sortBy: 'recent',
-    isLoading: false,
 
     // Action to set the userId
   userId: typeof window !== 'undefined' ? localStorage.getItem('userId'): '',  // Initial userId value
@@ -87,7 +84,6 @@ const useUserStore = create<Store>((set, get) => ({
         properties: get().properties.filter((item) => item._id !== id),
         filteredProperties: get().filteredProperties.filter((item) => item._id !== id),
     }),
-    setIsLoading: (isLoading) => set({ isLoading }),
 }));
 
 export default useUserStore;
