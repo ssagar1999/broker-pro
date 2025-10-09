@@ -43,7 +43,6 @@ export default function AddDataPageUI() {
     locality: "",
     landmark: "",
     pincode: '',
-    rooms: '',
     area: 0,
     floors: 0,
     furnishing: '',
@@ -52,18 +51,81 @@ export default function AddDataPageUI() {
     notes: ""
   });
 
+  // Validation state for each field
+  const [errors, setErrors] = useState<{
+    ownerName?: string;
+    ownerContact?: string;
+    propertyType?: string;
+    address?: string;
+    district?: string;
+    locality?: string;
+    landmark?: string;
+    pincode?: string;
+    area?: string;
+    floors?: string;
+    price?: string;
+    furnishing?: string;
+  }>({});
+
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImageFiles(Array.from(e.target.files));
+      const files = Array.from(e.target.files);
+      
+      // Check if more than 5 images are selected
+      if (files.length > 5) {
+        setImageError("You can only upload a maximum of 5 images");
+        return;
+      }
+      
+      setImageFiles(files);
+      setImageError(null);
     }
   };
+  
+  // Validation functions
+  const validateField = (name: string, value: any): string | undefined => {
+    switch (name) {
+      case 'ownerName':
+        return value.length < 2 ? 'Name must be at least 2 characters' : 
+               value.length > 50 ? 'Name cannot exceed 50 characters' : undefined;
+      case 'ownerContact':
+        return !/^\d{10}$/.test(value) ? 'Contact must be exactly 10 digits' : undefined;
+      case 'price':
+        return isNaN(Number(value)) || Number(value) <= 0 ? 'Price must be a positive number' : undefined;
+      case 'area':
+        return isNaN(Number(value)) || Number(value) <= 0 ? 'Area must be a positive number' : undefined;
+      case 'floors':
+        return isNaN(Number(value)) || Number(value) < 0 ? 'Floors must be a non-negative number' : undefined;
+      case 'pincode':
+        return !/^\d{6}$/.test(value) ? 'Pincode must be exactly 6 digits' : undefined;
+      case 'address':
+      case 'district':
+      case 'locality':
+      case 'landmark':
+        return value.length < 3 ? `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 3 characters` : 
+               value.length > 100 ? `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed 100 characters` : undefined;
+      case 'furnishing':
+        return value.length > 50 ? 'Furnishing details cannot exceed 50 characters' : undefined;
+      default:
+        return undefined;
+    }
+  };
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Validate the field and update errors
+    const error = validateField(name, value);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
   };
 
 
@@ -71,88 +133,131 @@ export default function AddDataPageUI() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if required fields are filled out
-    if (!formData.ownerName || !formData.propertyType || !formData.price || !location) {
-      toast.error("Please fill all required fields and set the location on the map.");
-      return;
-    }
-
-    setLoading(true);
-    const imageUrls = []; // Array to store URLs of uploaded images
-
     try {
-      // Initialize S3 SDK with environment variables (safe way to load credentials)
-      const s3 = new AWS.S3({
-        accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
-        secretAccessKey: 'ONzLPbcYzgUXhhgwL7rHwJDF8fsfVDgN4jhh8kFH',
-        region: 'us-east-1', // Change to your bucket's region
+      // Validate all fields
+      const newErrors: {[key: string]: string} = {};
+      let hasErrors = false;
+      
+      // Validate required fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'notes') return; // Notes are optional
+        
+        const error = validateField(key, value);
+        if (error) {
+          newErrors[key] = error;
+          hasErrors = true;
+        }
       });
-
-      // Loop through the selected images and upload each to S3
-      for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
-
-        const params = {
-          Bucket: "propertiesimages", // Set the S3 bucket name
-          Key: `properties/${Date.now()}_${file.name}`, // Generate a unique file name
-          Body: file,
-          ContentType: file.type,
-
-        };
-
-        // Upload the file to S3
-        const uploadResult = await s3.upload(params).promise();
-        imageUrls.push(uploadResult.Location); // Store the S3 URL
-
-        console.log(`${file.name} uploaded successfully!`);
+      
+      // Check location
+      if (!location) {
+        toast.error("Please set the location on the map.");
+        hasErrors = true;
       }
 
-      // Combine the form data with location and image URLs
+      // Check if images are selected
+      if (imageFiles.length === 0) {
+        setImageError("Please select at least one image");
+        hasErrors = true;
+      }
+      
+      // Update errors state
+      setErrors(newErrors);
+      
+      // Don't proceed if there are errors
+      if (hasErrors) {
+        toast.error("Please fix the errors before submitting.");
+        return;
+      }
+
+      setLoading(true);
+      
+      // Upload images to S3
+      const imageUrls = await uploadImagesToS3(imageFiles);
+      
+      // Prepare property data
       const propertyData = {
         ...formData,
         coordinates: location,
-        imageUrls: imageUrls, // Save the image URLs from S3
-        images: imageUrls, // Add the required 'images' property
-        category: 'sale', // Example category
-        brokerId: process.env.NEXT_PUBLIC_BROKERID || "68e29be01cc7a9a6eed56cfb", // Example broker ID
+        imageUrls: imageUrls,
+        images: imageUrls,
+        category: 'sale',
+        brokerId: process.env.NEXT_PUBLIC_BROKERID || "68e29be01cc7a9a6eed56cfb",
       };
 
-      // Call the API to save property data to MongoDB
+      // Save property to database
       const response = await addProperty(propertyData);
       toast.success("Property added successfully!");
       console.log("Property response:", response);
 
-      // Reset the form after successful submission
-      setFormData({
-        ownerName: "",
-        ownerContact: "",
-        propertyType: "",
-        rooms: '',
-        address: "",
-        district: "",
-        locality: "",
-        landmark: "",
-        pincode: '',
-        area: 0,
-        floors: 0,
-        furnishing: '',
-        price: 0,
-        status: "available" as "available" | "booked" | "unavailable",
-        notes: ""
-      });
-      setLocation(null);
-      setImageFiles([]); // Clear the selected image files
-
+      // Reset form after successful submission
+      resetForm();
     } catch (err) {
       console.error('Error:', err);
-      if (err instanceof Error) {
-        toast.error(err.message || "Failed to create property.");
-      } else {
-        toast.error("Failed to create property.");
-      }
+      handleSubmissionError(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to upload images to S3
+  const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
+    const imageUrls: string[] = [];
+    
+    // Initialize S3 SDK with environment variables
+    const s3 = new AWS.S3({
+      accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
+      secretAccessKey: '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',
+      region: 'us-east-1',
+    });
+
+    // Upload each image to S3
+    for (const file of files) {
+      const params = {
+        Bucket: "propertiesimages",
+        Key: `properties/${Date.now()}_${file.name}`,
+        Body: file,
+        ContentType: file.type,
+      };
+
+      const uploadResult = await s3.upload(params).promise();
+      imageUrls.push(uploadResult.Location);
+    }
+    
+    return imageUrls;
+  };
+
+  // Helper function to handle submission errors
+  const handleSubmissionError = (err: unknown) => {
+    if (err instanceof Error) {
+      toast.error(err.message || "Failed to create property.");
+    } else {
+      toast.error("Failed to create property.");
+    }
+  };
+
+  // Helper function to reset form
+  const resetForm = () => {
+    setFormData({
+      ownerName: "",
+      ownerContact: "",
+      propertyType: "",
+      rooms: '',
+      address: "",
+      district: "",
+      locality: "",
+      landmark: "",
+      pincode: '',
+      area: 0,
+      floors: 0,
+      furnishing: '',
+      price: 0,
+      status: "available" as "available" | "booked" | "unavailable",
+      notes: ""
+    });
+    setLocation(null);
+    setImageFiles([]);
+    setImageError(null);
   };
 
 
@@ -211,22 +316,54 @@ export default function AddDataPageUI() {
 
                     <div className="space-y-2">
                       <Label htmlFor="ownerName">Owner Name <span className="text-destructive">*</span></Label>
-                      <Input id="ownerName" name='ownerName' placeholder="John Smith" value={formData.ownerName} onChange={handleChange} />
+                      <Input 
+                        id="ownerName" 
+                        name='ownerName' 
+                        placeholder="John Smith" 
+                        value={formData.ownerName} 
+                        onChange={handleChange}
+                        className={errors.ownerName ? "border-destructive" : ""} 
+                      />
+                      {errors.ownerName && <p className="text-sm text-destructive">{errors.ownerName}</p>}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="ownerContact">Owner Contact <span className="text-destructive">*</span></Label>
-                      <Input id="ownerContact" name='ownerContact' placeholder="9876543210" value={formData.ownerContact} onChange={handleChange} />
+                      <Input 
+                        id="ownerContact" 
+                        name='ownerContact' 
+                        placeholder="9876543210" 
+                        value={formData.ownerContact} 
+                        onChange={handleChange}
+                        className={errors.ownerContact ? "border-destructive" : ""} 
+                      />
+                      {errors.ownerContact && <p className="text-sm text-destructive">{errors.ownerContact}</p>}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="area">area <span className="text-destructive">*</span></Label>
-                      <Input id="area" name='area' placeholder="area in sq feet" value={formData.area} onChange={handleChange} />
+                      <Label htmlFor="area">Area <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="area" 
+                        name='area' 
+                        placeholder="area in sq feet" 
+                        value={formData.area} 
+                        onChange={handleChange}
+                        className={errors.area ? "border-destructive" : ""} 
+                      />
+                      {errors.area && <p className="text-sm text-destructive">{errors.area}</p>}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="floors">Floors <span className="text-destructive">*</span></Label>
-                      <Input id="floors" name='floors' placeholder="2 floors" value={formData.floors} onChange={handleChange} />
+                      <Input 
+                        id="floors" 
+                        name='floors' 
+                        placeholder="2 floors" 
+                        value={formData.floors} 
+                        onChange={handleChange}
+                        className={errors.floors ? "border-destructive" : ""} 
+                      />
+                      {errors.floors && <p className="text-sm text-destructive">{errors.floors}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -262,14 +399,30 @@ export default function AddDataPageUI() {
 
                     <div className="space-y-2">
                       <Label htmlFor="furnishing">Furnishing <span className="text-destructive">*</span></Label>
-                      <Input id="furnishing" name='furnishing' placeholder="semi-furnished" value={formData.furnishing} onChange={handleChange} />
+                      <Input 
+                        id="furnishing" 
+                        name='furnishing' 
+                        placeholder="semi-furnished" 
+                        value={formData.furnishing} 
+                        onChange={handleChange}
+                        className={errors.furnishing ? "border-destructive" : ""} 
+                      />
+                      {errors.furnishing && <p className="text-sm text-destructive">{errors.furnishing}</p>}
                     </div>
 
 
                     <div className="space-y-2">
                       <Label htmlFor="propertyType">Property Type</Label>
-                      <Select name="propertyType" onValueChange={(val) => setFormData(prev => ({ ...prev, propertyType: val }))} value={formData.propertyType}>
-                        <SelectTrigger id="propertyType">
+                      <Select 
+                        name="propertyType" 
+                        onValueChange={(val) => {
+                          setFormData(prev => ({ ...prev, propertyType: val }));
+                          const error = validateField('propertyType', val);
+                          setErrors(prev => ({ ...prev, propertyType: error }));
+                        }} 
+                        value={formData.propertyType}
+                      >
+                        <SelectTrigger id="propertyType" className={errors.propertyType ? "border-destructive" : ""}>
                           <SelectValue placeholder="Select Property Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -280,30 +433,72 @@ export default function AddDataPageUI() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {errors.propertyType && <p className="text-sm text-destructive">{errors.propertyType}</p>}
                     </div>
                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="address">Address <span className="text-destructive">*</span></Label>
-                      <Input id="address" name="address" placeholder="New York, NY" value={formData.address} onChange={handleChange} />
+                      <Input 
+                        id="address" 
+                        name="address" 
+                        placeholder="New York, NY" 
+                        value={formData.address} 
+                        onChange={handleChange}
+                        className={errors.address ? "border-destructive" : ""} 
+                      />
+                      {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="district">District <span className="text-destructive">*</span></Label>
-                      <Input id="district" name="district" placeholder="New York, NY" value={formData.district} onChange={handleChange} />
+                      <Input 
+                        id="district" 
+                        name="district" 
+                        placeholder="New York, NY" 
+                        value={formData.district} 
+                        onChange={handleChange}
+                        className={errors.district ? "border-destructive" : ""} 
+                      />
+                      {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="locality">Locality <span className="text-destructive">*</span></Label>
-                      <Input id="locality" name="locality" placeholder="New York, NY" value={formData.locality} onChange={handleChange} />
+                      <Input 
+                        id="locality" 
+                        name="locality" 
+                        placeholder="New York, NY" 
+                        value={formData.locality} 
+                        onChange={handleChange}
+                        className={errors.locality ? "border-destructive" : ""} 
+                      />
+                      {errors.locality && <p className="text-sm text-destructive">{errors.locality}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="landmark">Landmark <span className="text-destructive">*</span></Label>
-                      <Input id="landmark" name="landmark" placeholder="New York, NY" value={formData.landmark} onChange={handleChange} />
+                      <Input 
+                        id="landmark" 
+                        name="landmark" 
+                        placeholder="New York, NY" 
+                        value={formData.landmark} 
+                        onChange={handleChange}
+                        className={errors.landmark ? "border-destructive" : ""} 
+                      />
+                      {errors.landmark && <p className="text-sm text-destructive">{errors.landmark}</p>}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="price">Price <span className="text-destructive">*</span></Label>
-                      <Input id="price" name="price" type="number" placeholder="500000" value={formData.price} onChange={handleChange} />
+                      <Input 
+                        id="price" 
+                        name="price" 
+                        type="number" 
+                        placeholder="500000" 
+                        value={formData.price} 
+                        onChange={handleChange}
+                        className={errors.price ? "border-destructive" : ""} 
+                      />
+                      {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                     </div>
                   </div>
 
@@ -311,14 +506,16 @@ export default function AddDataPageUI() {
 
 
                   <div className="space-y-2">
-                    <Label htmlFor="image">Property Image</Label>
+                    <Label htmlFor="image">Property Image (Max 5)</Label>
                     <Input
                       id="image"
                       name="image"
                       type="file"
                       onChange={handleImageChange} // Handle image upload
                       multiple
+                      className={imageError ? "border-destructive" : ""}
                     />
+                    {imageError && <p className="text-sm text-destructive">{imageError}</p>}
                   </div>
 
                   <div className="space-y-2">

@@ -34,13 +34,17 @@ export default function Home() {
 
     try {
       const response = await loginUser(formData);
-      setUserId(response.userId); // Store userId in Zustand store
-      setUserToken(response.token);
-      setIsAuthenticated(true);
-      localStorage.setItem("authToken", response.token);
-      router.push("/show-properties"); // Redirect to dashboard or another protected route
       console.log("Login response:", response);
-      // Handle successful login
+      
+      // Use the login function from userStore instead of individual setters
+      useUserStore.getState().login({
+        id: response.userId,
+        token: response.token,
+        role: 'user'
+      });
+      
+      // Force a page reload to ensure cookies are properly set
+      window.location.href = "/show-properties";
     } catch (error) {
       console.error("Login error:", error);
       // Handle login error
