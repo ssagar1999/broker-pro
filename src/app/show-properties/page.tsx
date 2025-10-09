@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { getStatusColor, formatPrice, formatDate } from "@/lib/utils";
 import useUserStore from "../../lib/store/userStore";
 import { getAllProperties } from "@/lib/api/propertiesApi";
+import { PropertySkeletonGrid } from "@/components/ui/property-skeleton";
 
 export default function ListDataPage() {
   const router = useRouter();
@@ -28,14 +29,14 @@ export default function ListDataPage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const userId = useUserStore((state) => state.userId);
-  const [loading, setLoading] = useState(false); // For loading state
-     console.log('no of times page rendered');
+  const isLoading = useUserStore((state) => state.isLoading);
+  const setIsLoading = useUserStore((state) => state.setIsLoading);
 
   // Fetch properties based on the userId
   useEffect(() => {
     const fetchData = async () => {
       console.log(userId, 'render times');
-      setLoading(true); // Start loading
+      setIsLoading(true); // Start loading
       try {
         const properties = await getAllProperties({ brokerId: userId });
 
@@ -44,12 +45,12 @@ export default function ListDataPage() {
       } catch (error) {
         console.error("Error fetching properties:", error);
       } finally {
-        setLoading(false); // End loading
+        setIsLoading(false); // End loading
       }
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, setIsLoading]);
 
   // Filtering logic
   useEffect(() => {
@@ -341,7 +342,9 @@ export default function ListDataPage() {
           </div>
 
           <div>
-            {filteredData.length === 0 ? (
+            {isLoading ? (
+              <PropertySkeletonGrid />
+            ) : filteredData.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <p className="mb-4 text-muted-foreground">
