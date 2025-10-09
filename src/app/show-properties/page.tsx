@@ -170,7 +170,7 @@ export default function ListDataPage() {
   const uniquePropertyTypes = Array.from(new Set(data.map((item) => item.propertyType)));
 
   return (
-    <AppLayout title="list Data" description="These are places available">
+    <AppLayout title="Properties" description="These are the properties available">
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="mb-6">
@@ -361,7 +361,7 @@ export default function ListDataPage() {
                 {filteredData.map((item) => (
                   <Card key={item._id} className="group relative overflow-hidden transition-shadow hover:shadow-lg">
                     {/* Property Image Placeholder */}
-                    <div style={{ backgroundImage: `url(${item.images[0]})` }} className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5">
+                   <div style={{ backgroundImage: `url(${item.images[0]})` }} className="relative bg-cover bg-center aspect-[4/3] overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center">
                           <MapPin className="mx-auto mb-2 h-12 w-12 text-muted-foreground/30" />
@@ -420,7 +420,7 @@ export default function ListDataPage() {
 
                       <div className="mt-4 flex gap-2">
                         <Button variant="outline" size="sm" className="flex-1 bg-transparent">
-                          View Details {item.status || 'dunno'}
+                          View Details
                         </Button>
                         <Button
                           variant="ghost"
