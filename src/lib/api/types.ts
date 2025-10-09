@@ -13,6 +13,7 @@ export interface BrokerData {
   rooms: string;
   area: number;
   floors: number;
+  status: 'available' | 'booked' | 'unavailable';
   furnishing: string;
   images: string[];
   pincode: string;

@@ -141,9 +141,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     setLocation(null);
     setImageFiles([]); // Clear the selected image files
 
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error:', err);
-    toast.error(err.message || "Failed to create property.");
+    if (err instanceof Error) {
+      toast.error(err.message || "Failed to create property.");
+    } else {
+      toast.error("Failed to create property.");
+    }
   } finally {
     setLoading(false);
   }

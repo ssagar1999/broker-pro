@@ -38,7 +38,7 @@ export default function ListDataPage() {
       setLoading(true); // Start loading
       try {
         const properties = await getAllProperties({ brokerId: userId });
-        
+
         setData(properties);
         setFilteredData(properties);
       } catch (error) {
@@ -59,15 +59,17 @@ export default function ListDataPage() {
     if (searchQuery) {
       result = result.filter(
         (item) =>
-          item.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.propertyType.toLowerCase().includes(searchQuery.toLowerCase())
+          item?.owner?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item?.location?.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item?.propertyType?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Status filter
     if (selectedStatuses.length > 0) {
-      result = result.filter((item) => selectedStatuses.includes(item.isActive));
+
+      // result = result.filter((item) => selectedStatuses.includes(item.isActive));
+      result = result.filter((item) => selectedStatuses.includes(item.status));
     }
 
     // Property type filter
@@ -138,10 +140,25 @@ export default function ListDataPage() {
   const removeStatusFilter = (status: string) => {
     setSelectedStatuses((prev) => prev.filter((s) => s !== status));
   };
+  const toggleStatusFilter = (status: string) => {
+      setSelectedStatuses((prev) =>
+    prev.includes(status)
+      ? prev.filter((t) => t !== status) // remove if already selected
+      : [...prev, status]                // add if not selected
+  );
+  };
 
   const removePropertyTypeFilter = (type: string) => {
     setSelectedPropertyTypes((prev) => prev.filter((t) => t !== type));
   };
+ const togglePropertyTypeFilter = (type: string) => {
+  setSelectedPropertyTypes((prev) =>
+    prev.includes(type)
+      ? prev.filter((t) => t !== type) // remove if already selected
+      : [...prev, type]                // add if not selected
+  );
+};
+  
 
   const clearPriceRange = () => {
     setPriceRange({ min: "", max: "" });
@@ -214,12 +231,12 @@ export default function ListDataPage() {
                       <div>
                         <h3 className="mb-3 text-sm font-medium">Status</h3>
                         <div className="space-y-2">
-                          {["active", "pending", "closed"].map((status) => (
+                          {["available", "booked", "unavailable"].map((status) => (
                             <div key={status} className="flex items-center space-x-2">
                               <Checkbox
                                 id={`status-${status}`}
                                 checked={selectedStatuses.includes(status)}
-                                // onCheckedChange={() => toggleStatusFilter(status)}
+                                onCheckedChange={() => toggleStatusFilter(status)}
                               />
                               <label
                                 htmlFor={`status-${status}`}
@@ -242,7 +259,7 @@ export default function ListDataPage() {
                                 <Checkbox
                                   id={`type-${type}`}
                                   checked={selectedPropertyTypes.includes(type)}
-                                  // onCheckedChange={() => togglePropertyTypeFilter(type)}
+                                  onCheckedChange={() => togglePropertyTypeFilter(type)}
                                 />
                                 <label
                                   htmlFor={`type-${type}`}
@@ -403,7 +420,7 @@ export default function ListDataPage() {
 
                       <div className="mt-4 flex gap-2">
                         <Button variant="outline" size="sm" className="flex-1 bg-transparent">
-                          View Details
+                          View Details {item.status || 'dunno'}
                         </Button>
                         <Button
                           variant="ghost"
