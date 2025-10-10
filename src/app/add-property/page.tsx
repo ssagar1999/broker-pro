@@ -9,15 +9,17 @@ import { AppLayout } from "../../components/layout/app-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import GoogleMapPicker from '../../components/Map/map'
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from "react"
 import { toast } from "react-hot-toast"; // optional toast notifications
 import { addProperty } from "../../lib/api/propertiesApi";
 import { generateRandomProperty } from "./generaterandomproperty";
 import useUserStore from "@/lib/store/userStore"
 import { rooms } from "@/lib/constants/data"
-import { usePropertiesStore } from "../../lib/store/propertyStore"
 import AWS from 'aws-sdk';
+
+
+
+// inside your component
 
 
 const propertyTypes = [
@@ -30,17 +32,6 @@ const propertyTypes = [
 import { AlertCircle, CheckCircle } from "lucide-react"
 
 export default function AddDataPageUI() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const isEditMode = searchParams.get('edit') === 'true'
-  const propertyId = searchParams.get('propertyId');
-    const detailsById = usePropertiesStore((s) => s.detailsById || {})
-  const isLoadingDetail = usePropertiesStore((s) => !!s.isLoadingDetail)
-  const fetchPropertyById = usePropertiesStore((s) => s.fetchPropertyById!)
-
-    const property = propertyId ? detailsById[propertyId] : null;
-  // const fetchPropertyById = usePropertiesStore((s) => s.fetchPropertyById!)
-
 
   const brokerId = useUserStore((s) => s.userId)
   const [formData, setFormData] = useState({
@@ -84,34 +75,6 @@ export default function AddDataPageUI() {
   const [loading, setLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
-
-
-
-    useEffect(() => {
-    if (property && isEditMode) {
-      // Fill the form with the existing property data if it's in edit mode
-      setFormData({
-    ownerName: property.owner.name,
-    ownerContact: property?.owner?.phoneNumber || '',
-    rooms: property.rooms,
-    propertyType: property.propertyType,
-    address: property.location.address,
-    brokerId: property.brokerId,
-    district: property.location.district,
-    city:property.location.city,
-    locality: property.location.locality || '',
-    landmark: property.location.landmark || '',
-    pincode: property.pincode,
-    area: property.area,
-    floors: property.floors,
-    furnishing: property.furnishing,
-    price: property.price,
-    status: "available" as "available" | "booked" | "unavailable",
-    notes: property.notes || ''
-        // Set the rest of the form fields...
-      })
-    }
-  }, [property, isEditMode])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -174,12 +137,7 @@ export default function AddDataPageUI() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
-
-     if (isEditMode) {
-      // Update existing property logic here
-    } else {
-  try {
+    try {
       // Validate all fields
       const newErrors: {[key: string]: string} = {};
       let hasErrors = false;
@@ -244,9 +202,6 @@ export default function AddDataPageUI() {
     } finally {
       setLoading(false);
     }
-    }
-
-  
   };
 
   // Helper function to upload images to S3
@@ -581,7 +536,7 @@ export default function AddDataPageUI() {
                   </div>
 
                   <div className="flex gap-3">
-                      <Button type="submit">{isEditMode ? 'Update Property' : 'Add Property'}</Button>
+                    <Button type="submit" className="flex-1">Save Data</Button>
                     <Button type="button" variant="outline">Cancel</Button>
                   </div>
 
