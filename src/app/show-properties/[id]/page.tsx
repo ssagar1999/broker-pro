@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react"
 import { useParams } from "next/navigation"
 import Image from "next/image"
+import { ImageSlider } from "@/components/properties/image-slider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,10 +25,22 @@ export default function PropertyDetailsPage() {
     if (!property) fetchPropertyById(id)
   }, [id, property, fetchPropertyById])
 
-  const coverImage = useMemo(() => {
-    const first = (property?.images as string[] | undefined)?.[0]
-    return first || "/property-hero.jpg"
+  const sliderImages = useMemo(() => {
+    const imgs = (property?.images as string[] | undefined) || []
+    if (imgs.length > 0) {
+      return imgs.map((src, i) => ({
+        src,
+        alt: `${(property as any)?.title ?? property?.location?.address ?? "Property"} image ${i + 1}`,
+      }))
+    }
+    // Fallback images (safe placeholders)
+    return [
+      { src: "/primary-property-image.jpg", alt: "Primary property image" },
+      { src: "/secondary-property-image.jpg", alt: "Secondary property image" },
+    ]
   }, [property])
+
+
 
   if (isLoadingDetail && !property) {
     // Lightweight inline skeleton; route-level loading.tsx also covers initial transition
@@ -76,15 +89,13 @@ export default function PropertyDetailsPage() {
       {/* Hero */}
       <section className="relative overflow-hidden rounded-xl border">
         <div className="relative w-full h-[280px] md:h-[420px]">
-     <Image
-  src={coverImage || "/placeholder.svg"}
-  alt="Property hero"
-  fill
-  className="object-cover"
-  sizes="(max-width: 768px) 100vw, 1200px"
-  priority
-  loader={({ src, width }) => `${src}?w=${width}&q=75`} // resize & quality
-/>
+       <ImageSlider
+          images={sliderImages}
+          className="rounded-none border-0"
+          heightClassName="h-[260px] md:h-[420px]"
+          showIndicators
+          showArrows
+        />
         </div>
         <div className="absolute left-4 top-4 flex items-center gap-2">
           <Badge className="bg-primary text-primary-foreground">{status}</Badge>
