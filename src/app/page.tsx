@@ -3,9 +3,6 @@
 import { Button } from "@/components/ui/button"   // ShadCN Button
 import { Input } from "@/components/ui/input"     // ShadCN Input
 import { Label } from "@/components/ui/label"     // ShadCN Label
-import { Textarea } from "@/components/ui/textarea"  // ShadCN Textarea
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card" // ShadCN Card
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"  // ShadCN Select
 import { AlertCircle, CheckCircle } from "lucide-react" // For icons
 import Link from "next/link" // Next.js Link
 import { loginUser } from "../lib/api/userApi";
@@ -17,12 +14,9 @@ export default function Home() {
   const [formData, setFormData] = useState({
     emailOrphone: "",
     password: "",
-  })
-  const router = useRouter();
-  const setUserId = useUserStore(state => state.setUserId);
+  });
+  let router = useRouter();
 
-  const setUserToken = useUserStore(state => state.setUserToken);
-  const setIsAuthenticated = useUserStore(state => state.setIsAuthenticated);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
@@ -44,7 +38,9 @@ export default function Home() {
       });
       
       // Force a page reload to ensure cookies are properly set
-      window.location.href = "/show-properties";
+      // window.location.href = "/show-properties";
+      router.push("/show-properties");
+
     } catch (error) {
       console.error("Login error:", error);
       // Handle login error
@@ -81,7 +77,7 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center p-8 w-full lg:w-1/2">
         <div className="w-full max-w-sm space-y-8">
           <div className="text-center">
-            <h1 className="text-2xl font-script mb-6">auto broket</h1>
+            <h1 className="text-2xl font-script mb-6">auto broker</h1>
             <h2 className="text-xl text-gray-600">Welcome to auto broker</h2>
           </div>
 
@@ -141,7 +137,7 @@ export default function Home() {
                 Create Account
               </Link>
                     <Link href="/add-property" className="font-medium text-primary hover:underline">
-                go to add propert
+                go to add property
               </Link>
             </p>
           </form>

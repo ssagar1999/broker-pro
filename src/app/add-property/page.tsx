@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,7 +13,8 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"; // optional toast notifications
 import { addProperty } from "../../lib/api/propertiesApi";
 import { generateRandomProperty } from "./generaterandomproperty";
-import { rooms } from "@/lib/data/data"
+import useUserStore from "@/lib/store/userStore"
+import { rooms } from "@/lib/constants/data"
 import AWS from 'aws-sdk';
 
 
@@ -32,14 +33,16 @@ import { AlertCircle, CheckCircle } from "lucide-react"
 
 export default function AddDataPageUI() {
 
-
+  const brokerId = useUserStore((s) => s.userId)
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerContact: "",
     propertyType: "",
     rooms: '',
     address: "",
+    brokerId: '',
     district: "",
+    city:'',
     locality: "",
     landmark: "",
     pincode: '',
@@ -57,6 +60,7 @@ export default function AddDataPageUI() {
     ownerContact?: string;
     propertyType?: string;
     address?: string;
+    brokerId?: string;
     district?: string;
     locality?: string;
     landmark?: string;
@@ -182,7 +186,7 @@ export default function AddDataPageUI() {
         imageUrls: imageUrls,
         images: imageUrls,
         category: 'sale',
-        brokerId: process.env.NEXT_PUBLIC_BROKERID || "68e29be01cc7a9a6eed56cfb",
+        brokerId: brokerId || "", // Ensure brokerId is always a string
       };
 
       // Save property to database
@@ -243,9 +247,11 @@ export default function AddDataPageUI() {
       ownerContact: "",
       propertyType: "",
       rooms: '',
+      brokerId: '',
       address: "",
       district: "",
       locality: "",
+      city:'',
       landmark: "",
       pincode: '',
       area: 0,

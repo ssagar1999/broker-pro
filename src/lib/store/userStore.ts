@@ -1,7 +1,7 @@
 // lib/store/userStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BrokerData } from '@/lib/api/types';
+import type { Property } from '@/lib/api/types';
 
 interface AuthUser {
   id: string;
@@ -16,8 +16,8 @@ interface Store {
     user: AuthUser | null;
     isLoading: boolean;
 
-    properties: BrokerData[];
-    filteredProperties: BrokerData[];
+    properties: Property[];
+    filteredProperties: Property[];
     favorites: Set<string>;
     searchQuery: string;
     sortBy: string;
@@ -32,8 +32,8 @@ interface Store {
     setIsLoading: (isLoading: boolean) => void;
     
     // Data Actions
-    setProperties: (data: BrokerData[]) => void;
-    setFilteredProperties: (data: BrokerData[]) => void;
+    setProperties: (data: Property[]) => void;
+    setFilteredProperties: (data: Property[]) => void;
     toggleFavorite: (id: string) => void;
     setSearchQuery: (query: string) => void;
     setSortBy: (sort: string) => void;

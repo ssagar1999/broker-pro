@@ -1,24 +1,67 @@
 // lib/api/types.ts
 
-export interface BrokerData {
+export interface Property {
   _id: string;
-  clientName: string;
-  propertyType: string;
+  brokerId: string;
+
+  title: string;
+  description: string;
+  propertyType:
+    | 'house'
+    | 'apartment'
+    | 'office'
+    | 'shop'
+    | 'land'
+    | 'warehouse'
+    | 'other'
+    | 'pg'
+    | 'hostel'
+    | 'farmhouse'
+    | 'villa'
+    | 'duplex'
+    | 'studio'
+    | 'penthouse'
+    | 'residential plot'
+    | 'commercial plot';
+
+  rooms: '1RK' | '2RK' | '3RK' | '1BHK' | '2BHK' | '4BHK' | '3BHK';
+  category: 'rent' | 'sale' | 'lease';
+  status: 'available' | 'booked' | 'unavailable';
+
   location: {
-    address: string; district: string; locality: string; landmark: string
+    city: string;
+    address: string;
+    district: string;
+    locality?: string;
+    landmark?: string;
+    coordinates?: [number, number]; // [longitude, latitude]
   };
-  price: number;
-  isActive: 'active' | 'pending' | 'closed';
-  owner:{ name: string; contact: string};
-  rooms: string;
+
   area: number;
   floors: number;
-  status: 'available' | 'booked' | 'unavailable';
-  furnishing: string;
+  furnishing: 'Furnished' | 'Semi-Furnished' | 'Unfurnished';
+
+  owner: {
+    name: string;
+    phoneNumber?: string;
+    email?: string;
+  };
+
+  price: number;
   images: string[];
-  pincode: string;
-  notes?: string;
+
+  meta: {
+    views: number;
+    favorites: number;
+    verified: boolean;
+    tags: string[];
+    createdBy: string;
+    notes?: string;
+  };
+
+  extra?: Record<string, any>;
+  isActive: boolean;
+
   createdAt: string;
+  updatedAt: string;
 }
-
-

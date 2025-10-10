@@ -8,7 +8,9 @@ export interface PropertyFormData {
   propertyType: string;
   rooms: string;
   address: string;
+  city: string;
   district: string;
+  brokerId: string;
   locality: string;
   landmark: string;
   pincode: string;
@@ -49,6 +51,7 @@ export function generateRandomProperty() {
   const landmark = getRandom(landmarks);
   const furnishing = getRandom(furnishings);
   const propertyType = getRandom(types);
+  const city = "Pune";
 
   const propertyData: PropertyFormData = {
     ownerName: `Owner ${Math.floor(Math.random() * 1000)}`,
@@ -57,8 +60,10 @@ export function generateRandomProperty() {
     rooms: String(1 + Math.floor(Math.random() * 5)),
     address: `${Math.floor(Math.random() * 100)} ${locality} Road`,
     district,
+    city,
     locality,
     landmark,
+    brokerId:'68e895ab659362fb76946fbe',
     pincode: String(400000 + Math.floor(Math.random() * 9999)),
     area: 500 + Math.floor(Math.random() * 2500),
     floors: 1 + Math.floor(Math.random() * 5),

@@ -23,6 +23,17 @@ export const addProperty = async (propertyData: {
     return apiRequest('/properties/add', 'POST', propertyData);
 };
 
-export const getAllProperties = async ({ brokerId }: { brokerId: string |null }) => {
+// export const getAllProperties = async ({ brokerId }: { brokerId: string |null }) => {
+//   return apiRequest('/properties/getProperties', 'POST', { brokerId });
+// };
+// export const getPropertyById = async ({ brokerId }: { brokerId: string |null },propertyId: string) => {
+//   return apiRequest('/properties/getPropertyById', 'POST', { brokerId, propertyId });
+// };
+
+export const getAllProperties = async (brokerId: string | null) => {
   return apiRequest('/properties/getProperties', 'POST', { brokerId });
+};
+
+export const getPropertyById = async (brokerId: string | null, propertyId: string) => {
+  return apiRequest('/properties/getPropertyById', 'POST', { brokerId, propertyId });
 };
