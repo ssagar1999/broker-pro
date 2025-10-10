@@ -1,88 +1,106 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { useParams } from "next/navigation"
-import { AppLayout } from "../../../components/layout/app-layout"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import GoogleMapPicker from '../../../components/Map/map'
-import { useState, useEffect } from "react"
-import { toast } from "react-hot-toast"; // optional toast notifications
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useParams } from "next/navigation";
+import { AppLayout } from "../../../components/layout/app-layout";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import GoogleMapPicker from "../../../components/Map/map";
+import { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import { updatePropertyById } from "../../../lib/api/propertiesApi";
-import { usePropertiesStore } from "../../../lib/store/propertyStore"
-import { rooms } from "../../../lib/data/data"
-import AWS from 'aws-sdk';
+import { usePropertiesStore } from "../../../lib/store/propertyStore";
+import { rooms } from "../../../lib/data/data";
+import AWS from "aws-sdk";
+import { AlertCircle, CheckCircle } from "lucide-react";
+import { title } from "process";
 
 const propertyTypes = [
-  'house', 'apartment', 'office', 'shop', 'land', 'warehouse', 'other',
-  'pg', 'hostel', 'farmhouse', 'villa', 'duplex', 'studio', 'penthouse',
-  'residential plot', 'commercial plot'
+  "house",
+  "apartment",
+  "office",
+  "shop",
+  "land",
+  "warehouse",
+  "other",
+  "pg",
+  "hostel",
+  "farmhouse",
+  "villa",
+  "duplex",
+  "studio",
+  "penthouse",
+  "residential plot",
+  "commercial plot",
 ];
-
-import { AlertCircle, CheckCircle } from "lucide-react"
 
 export default function AddDataPageUI() {
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerContact: "",
     propertyType: "",
-    rooms: '',
+    rooms: "",
     address: "",
-    brokerId: '',
+    brokerId: "",
     district: "",
-    city:'',
+    city: "",
+    category: "",
     locality: "",
+    title: "",
+    description:'',
     landmark: "",
-    pincode: '',
+    pincode: "",
     area: 0,
     floors: 0,
-    furnishing: '',
+    furnishing: "",
     price: 0,
     status: "available" as "available" | "booked" | "unavailable",
-    notes: ""
+    notes: "",
   });
 
-  const params = useParams() as { id?: string }
-  const id = params?.id ?? ""
+  const params = useParams() as { id?: string };
+  const id = params?.id ?? "";
 
-  const detailsById = usePropertiesStore((s) => s.detailsById || {})
-  const isLoadingDetail = usePropertiesStore((s) => !!s.isLoadingDetail)
-  const fetchPropertyById = usePropertiesStore((s) => s.fetchPropertyById!)
+  const detailsById = usePropertiesStore((s) => s.detailsById || {});
+  const isLoadingDetail = usePropertiesStore((s) => !!s.isLoadingDetail);
+  const fetchPropertyById = usePropertiesStore((s) => s.fetchPropertyById!);
 
-  const property = detailsById[id]
-
-  useEffect(() => {
-    if (!id) return
-    if (!property) fetchPropertyById(id)
-  }, [id, property, fetchPropertyById])
+  const property = detailsById[id];
 
   useEffect(() => {
-    // Only update formData if property data has changed
-    if (property && !formData.ownerName) { // Check if the formData is not already filled
+    if (!id) return;
+    if (!property) fetchPropertyById(id);
+  }, [id, property, fetchPropertyById]);
+
+  useEffect(() => {
+    if (property && !formData.ownerName) {
       setFormData({
         ownerName: property.owner.name,
-        ownerContact: property?.owner?.phoneNumber || '',
+        ownerContact: property?.owner?.phoneNumber || "",
         rooms: property.rooms,
+        title: property.title,
+        description: property.description,
         propertyType: property.propertyType,
         address: property.location.address,
         brokerId: property.brokerId,
         district: property.location.district,
         city: property.location.city,
-        locality: property.location.locality || '',
-        landmark: property.location.landmark || '',
+        locality: property.location.locality || "",
+        landmark: property.location.landmark || "",
         pincode: property.pincode,
         area: property.area,
+        category: property.category,
         floors: property.floors,
         furnishing: property.furnishing,
         price: property.price,
         status: property.status || "available",
-        notes: property.notes || ''
+        notes: property.notes || "",
       });
     }
-  }, [property, formData]); // Only rerun when 'property' changes
+  }, [property, formData]);
 
   const [errors, setErrors] = useState<{
     ownerName?: string;
@@ -93,6 +111,8 @@ export default function AddDataPageUI() {
     district?: string;
     locality?: string;
     landmark?: string;
+    title?: string;
+    description?: string;
     pincode?: string;
     area?: string;
     floors?: string;
@@ -108,143 +128,132 @@ export default function AddDataPageUI() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      
+
       if (files.length > 5) {
         setImageError("You can only upload a maximum of 5 images");
         return;
       }
-      
+
       setImageFiles(files);
       setImageError(null);
     }
   };
 
-
-  // Validation functions
   const validateField = (name: string, value: any): string | undefined => {
     switch (name) {
-      case 'ownerName':
-        return value.length < 2 ? 'Name must be at least 2 characters' : 
-               value.length > 50 ? 'Name cannot exceed 50 characters' : undefined;
-      case 'ownerContact':
-        return !/^\d{10}$/.test(value) ? 'Contact must be exactly 10 digits' : undefined;
-      case 'price':
-        return isNaN(Number(value)) || Number(value) <= 0 ? 'Price must be a positive number' : undefined;
-      case 'area':
-        return isNaN(Number(value)) || Number(value) <= 0 ? 'Area must be a positive number' : undefined;
-      case 'floors':
-        return isNaN(Number(value)) || Number(value) < 0 ? 'Floors must be a non-negative number' : undefined;
-      case 'pincode':
-        return !/^\d{6}$/.test(value) ? 'Pincode must be exactly 6 digits' : undefined;
-      case 'address':
-      case 'district':
-      case 'locality':
-      case 'landmark':
-        return value.length < 3 ? `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 3 characters` : 
-               value.length > 100 ? `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed 100 characters` : undefined;
-      case 'furnishing':
-        return value.length > 50 ? 'Furnishing details cannot exceed 50 characters' : undefined;
+      case "ownerName":
+        return value.length < 2 ? "Name must be at least 2 characters" : value.length > 50 ? "Name cannot exceed 50 characters" : undefined;
+      case "ownerContact":
+        return !/^\d{10}$/.test(value) ? "Contact must be exactly 10 digits" : undefined;
+      case "price":
+        return isNaN(Number(value)) || Number(value) <= 0 ? "Price must be a positive number" : undefined;
+      case "area":
+        return isNaN(Number(value)) || Number(value) <= 0 ? "Area must be a positive number" : undefined;
+      case "floors":
+        return isNaN(Number(value)) || Number(value) < 0 ? "Floors must be a non-negative number" : undefined;
+      case "pincode":
+        return !/^\d{6}$/.test(value) ? "Pincode must be exactly 6 digits" : undefined;
+      case "address":
+      case "district":
+      case "locality":
+      case "landmark":
+        return value.length < 3 ? `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 3 characters` : value.length > 100 ? `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed 100 characters` : undefined;
+      case "furnishing":
+      case "title":
+      case "description":
+        return value.length > 50 ? "Furnishing details cannot exceed 50 characters" : undefined;
       default:
         return undefined;
     }
   };
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Validate the field and update errors
     const error = validateField(name, value);
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: error
+      [name]: error,
     }));
   };
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let hasErrors = false;
+
+    const newErrors: { [key: string]: string } = {};
+    // Validate all fields
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "notes") return; // Notes are optional
+
+      const error = validateField(key, value);
+      console
+      if (error) {
+        newErrors[key] = error;
+        hasErrors = true;
+      }
+    });
+
+    // Check location
+    if (!location) {
+      toast.error("Please set the location on the map.");
+      hasErrors = true;
+    }
+
+    // Check if images are selected
+    if (imageFiles.length === 0) {
+      setImageError("Please select at least one image");
+      hasErrors = true;
+    }
+
+    // Update errors state
+    setErrors(newErrors);
+
+    // Don't proceed if there are errors
+    if (hasErrors) {
+      toast.error("Please fix the errors before submitting.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      // Validate all fields
-      const newErrors: {[key: string]: string} = {};
-      let hasErrors = false;
-      
-      // Validate required fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === 'notes') return; // Notes are optional
-        
-        const error = validateField(key, value);
-        if (error) {
-          newErrors[key] = error;
-          hasErrors = true;
-        }
-      });
-      
-      // Check location
-      if (!location) {
-        toast.error("Please set the location on the map.");
-        hasErrors = true;
-      }
-
-      // Check if images are selected
-      if (imageFiles.length === 0) {
-        setImageError("Please select at least one image");
-        hasErrors = true;
-      }
-      
-      // Update errors state
-      setErrors(newErrors);
-      
-      // Don't proceed if there are errors
-      if (hasErrors) {
-        toast.error("Please fix the errors before submitting.");
-        return;
-      }
-
-      setLoading(true);
-      
       // Upload images to S3
       const imageUrls = await uploadImagesToS3(imageFiles);
-      
+
       // Prepare property data
       const propertyData = {
         ...formData,
         coordinates: location,
-        imageUrls: imageUrls,
         images: imageUrls,
-        category: 'sale',
+        category: "sale",
         brokerId: property.brokerId || "", // Ensure brokerId is always a string
       };
 
       // Save property to database
-      const response = await updatePropertyById(property.brokerId, id, property);
-      toast.success("Property added successfully!");
+      const response = await updatePropertyById(property.brokerId, id, propertyData);
+      toast.success("Property updated successfully!");
       console.log("Property response:", response);
 
-      // Reset form after successful submission
       resetForm();
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error:", err);
       handleSubmissionError(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper function to upload images to S3
   const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
     const imageUrls: string[] = [];
-    
-    // Initialize S3 SDK with environment variables
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
-      secretAccessKey: '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',
-      region: 'us-east-1',
-    });
+      const s3 = new AWS.S3({
+        accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
+        secretAccessKey: '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',
+        region: 'us-east-1',
+      });
 
-    // Upload each image to S3
     for (const file of files) {
       const params = {
         Bucket: "propertiesimages",
@@ -256,11 +265,10 @@ export default function AddDataPageUI() {
       const uploadResult = await s3.upload(params).promise();
       imageUrls.push(uploadResult.Location);
     }
-    
+
     return imageUrls;
   };
 
-  // Helper function to handle submission errors
   const handleSubmissionError = (err: unknown) => {
     if (err instanceof Error) {
       toast.error(err.message || "Failed to create property.");
@@ -269,38 +277,33 @@ export default function AddDataPageUI() {
     }
   };
 
-  // Helper function to reset form
   const resetForm = () => {
     setFormData({
       ownerName: "",
       ownerContact: "",
       propertyType: "",
-      rooms: '',
-      brokerId: '',
+      rooms: "",
+      brokerId: "",
       address: "",
       district: "",
+      category: "",
+      title:'',
+      description:'',
       locality: "",
-      city:'',
+      city: "",
       landmark: "",
-      pincode: '',
+      pincode: "",
       area: 0,
       floors: 0,
-      furnishing: '',
+      furnishing: "",
       price: 0,
       status: "available" as "available" | "booked" | "unavailable",
-      notes: ""
+      notes: "",
     });
     setLocation(null);
     setImageFiles([]);
     setImageError(null);
   };
-
-
-
-
-
-
-
 
 
   return (
@@ -499,6 +502,19 @@ export default function AddDataPageUI() {
                       />
                       {errors.locality && <p className="text-sm text-destructive">{errors.locality}</p>}
                     </div>
+              
+                    <div className="space-y-2">
+                      <Label htmlFor="locality">Title <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="title" 
+                        name="title" 
+                        placeholder="2 gaj ka makan" 
+                        value={formData.title} 
+                        onChange={handleChange}
+                        className={errors.title ? "border-destructive" : ""} 
+                      />
+                      {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="landmark">Landmark <span className="text-destructive">*</span></Label>
                       <Input 
@@ -525,6 +541,20 @@ export default function AddDataPageUI() {
                       />
                       {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                     </div>
+
+                          <div className="space-y-2">
+                      <Label htmlFor="pincode">Pincode <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="pincode" 
+                        name="pincode" 
+                        type="number" 
+                        placeholder="110094" 
+                        value={formData.pincode} 
+                        onChange={handleChange}
+                        className={errors.pincode ? "border-destructive" : ""} 
+                      />
+                      {errors.pincode && <p className="text-sm text-destructive">{errors.pincode}</p>}
+                    </div>
                   </div>
 
 
@@ -550,15 +580,14 @@ export default function AddDataPageUI() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea id="notes" name="notes" placeholder="Additional information..." rows={4} value={formData.notes} onChange={handleChange} />
+                    <Label htmlFor="description">Desctiption</Label>
+                    <Textarea id="description" name="description" placeholder="description..." rows={4} value={formData.description} onChange={handleChange} />
                   </div>
 
                   <div className="flex gap-3">
-                    <Button type="submit" className="flex-1">Save Data</Button>
+                    <Button type="submit" className="flex-1">Update</Button>
                     <Button type="button" variant="outline">Cancel</Button>
                   </div>
-
                 </form>
               </CardContent>
             </Card>
