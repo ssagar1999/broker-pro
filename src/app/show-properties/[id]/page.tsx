@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useMemo } from "react"
-import { useParams } from "next/navigation"
-import Image from "next/image"
+import { useParams, useRouter } from "next/navigation"
 import { ImageSlider } from "@/components/properties/image-slider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,6 +12,7 @@ import { formatPrice } from "../../../lib/utils" // add import
 export default function PropertyDetailsPage() {
   const params = useParams() as { id?: string }
   const id = params?.id ?? ""
+  const router = useRouter()
 
   const detailsById = usePropertiesStore((s) => s.detailsById || {})
   const isLoadingDetail = usePropertiesStore((s) => !!s.isLoadingDetail)
@@ -196,8 +196,8 @@ export default function PropertyDetailsPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="default">Request Info</Button>
-              <Button variant="secondary">Schedule Tour</Button>
+              <Button variant="default" onClick={() => router.push(`/edit-property/${property?._id}`)}>Edit</Button>
+              {/* <Button variant="secondary">Schedule Tour</Button> */}
             </div>
           </CardContent>
         </Card>

@@ -1,5 +1,6 @@
 // lib/api/propertiesApi.ts
 import { apiRequest } from "./api";
+import { Property } from "@/lib/api/types";
 
 export const addProperty = async (propertyData: {
     brokerId: string;
@@ -23,12 +24,6 @@ export const addProperty = async (propertyData: {
     return apiRequest('/properties/add', 'POST', propertyData);
 };
 
-// export const getAllProperties = async ({ brokerId }: { brokerId: string |null }) => {
-//   return apiRequest('/properties/getProperties', 'POST', { brokerId });
-// };
-// export const getPropertyById = async ({ brokerId }: { brokerId: string |null },propertyId: string) => {
-//   return apiRequest('/properties/getPropertyById', 'POST', { brokerId, propertyId });
-// };
 
 export const getAllProperties = async (brokerId: string | null) => {
   return apiRequest('/properties/getProperties', 'POST', { brokerId });
@@ -37,3 +32,9 @@ export const getAllProperties = async (brokerId: string | null) => {
 export const getPropertyById = async (brokerId: string | null, propertyId: string) => {
   return apiRequest('/properties/getPropertyById', 'POST', { brokerId, propertyId });
 };
+
+export const updatePropertyById = async (brokerId: string , propertyId: string, propertyData:Property ) => {
+  return apiRequest('/properties/updatePropertyById', 'POST', { brokerId, propertyId, propertyData });
+};
+
+
