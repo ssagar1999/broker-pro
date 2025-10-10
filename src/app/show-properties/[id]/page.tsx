@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { ImageSlider } from "@/components/properties/image-slider"
 import { Badge } from "@/components/ui/badge"
@@ -12,13 +12,23 @@ import { formatPrice } from "../../../lib/utils" // add import
 
 export default function PropertyDetailsPage() {
   const params = useParams() as { id?: string }
+  const router = useRouter();
   const id = params?.id ?? ""
 
   const detailsById = usePropertiesStore((s) => s.detailsById || {})
   const isLoadingDetail = usePropertiesStore((s) => !!s.isLoadingDetail)
   const fetchPropertyById = usePropertiesStore((s) => s.fetchPropertyById!)
 
-  const property = detailsById[id]
+  const property = detailsById[id];
+
+    const handleEditClick = () => {
+    //   router.push({ pathname: '/add-property', query: { edit: 'true', propertyId: id } } as any);
+
+  router.push(`/add-property?edit=true&propertyId=${id}`);
+
+
+  }
+
 
   useEffect(() => {
     if (!id) return
@@ -196,8 +206,8 @@ export default function PropertyDetailsPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="default">Request Info</Button>
-              <Button variant="secondary">Schedule Tour</Button>
+              <Button variant="default" onClick={handleEditClick}>Edit Info</Button>
+              {/* <Button variant="secondary">Schedule Tour</Button> */}
             </div>
           </CardContent>
         </Card>
