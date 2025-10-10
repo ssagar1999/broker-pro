@@ -59,6 +59,9 @@ export interface Property {
     notes?: string;
   };
 
+  pincode: string;
+  notes?: string;
+
   extra?: Record<string, any>;
   isActive: boolean;
 
