@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,12 +15,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Building2, AlertCircle } from "lucide-react"
-import { toast } from "react-hot-toast"  // Optional for success and error messages
-import axios from "axios"  // Import axios for API calls
-import { registerUser } from "../../lib/api/userApi";
+import axios from "axios"
+import { registerUser } from "../../lib/api/userApi"
+import { toastUtils, toastMessages } from "../../lib/utils/toast"
 
 
 export default function RegisterPageUI() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -28,38 +30,48 @@ export default function RegisterPageUI() {
     confirmPassword: "",
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")  // For handling error messages
+  const [error, setError] = useState("")
 
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")  // Reset the error before submitting the form
+    setError("")
 
     // Basic client-side validation
     if (!formData.username || !formData.email || !formData.phoneNumber || !formData.password || !formData.confirmPassword) {
-      setError("All fields are required")
+      setError(toastMessages.requiredFields)
+      toastUtils.error(toastMessages.requiredFields)
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
+      setError(toastMessages.passwordMismatch)
+      toastUtils.error(toastMessages.passwordMismatch)
       return
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long")
+      setError(toastMessages.weakPassword)
+      toastUtils.error(toastMessages.weakPassword)
       return
     }
 
     setLoading(true)
+    
     try {
-      console.log(formData)
-      // Call your API here for user registration
-      const response = await registerUser(formData)
-      // On success, you can handle the response and show a success message
-      toast.success("User registered successfully!")
-      console.log(response.data)
+      console.log("Registering user:", formData)
+      
+      // Use promise-based toast for better UX
+      await toastUtils.promise(
+        registerUser(formData),
+        {
+          loading: 'Creating your account...',
+          success: toastMessages.registerSuccess,
+          error: toastMessages.registerError,
+        }
+      )
+
       // Reset the form
       setFormData({
         username: "",
@@ -68,18 +80,23 @@ export default function RegisterPageUI() {
         password: "",
         confirmPassword: "",
       })
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(error.response?.data || error.message)
-      } else {
-        console.error(error)
-      }
-      // Show the error message
-      const errorMessage = axios.isAxiosError(error)
-        ? error.response?.data?.message || "Registration failed"
-        : "An unexpected error occurred";
-      toast.error(errorMessage);
 
+      // Redirect to login page after successful registration
+      setTimeout(() => {
+        router.push("/")
+      }, 1500) // Small delay to let user see success message
+
+    } catch (error) {
+      console.error("Registration error:", error)
+      
+      // Handle specific error messages
+      let errorMessage = toastMessages.registerError
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message || toastMessages.registerError
+      }
+      
+      setError(errorMessage)
+      toastUtils.error(errorMessage)
     } finally {
       setLoading(false)
     }

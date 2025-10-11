@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import GoogleMapPicker from "../../../components/Map/map";
 import { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 import { updatePropertyById } from "../../../lib/api/propertiesApi";
 import { usePropertiesStore } from "../../../lib/store/propertyStore";
+import { toastUtils, toastMessages } from "../../../lib/utils/toast";
 import { rooms } from "../../../lib/data/data";
 import { uploadImagesToS3 } from "../../../lib/utils";
 import { AlertCircle, CheckCircle } from "lucide-react";
@@ -38,6 +39,7 @@ const propertyTypes = [
 ];
 
 export default function AddDataPageUI() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerContact: "",
@@ -198,7 +200,7 @@ export default function AddDataPageUI() {
 
     // Check location
     if (!location) {
-      toast.error("Please set the location on the map.");
+      toastUtils.error("Please set the location on the map.");
       hasErrors = true;
     }
 
@@ -213,7 +215,7 @@ export default function AddDataPageUI() {
 
     // Don't proceed if there are errors
     if (hasErrors) {
-      toast.error("Please fix the errors before submitting.");
+      toastUtils.error("Please fix the errors before submitting.");
       return;
     }
 
@@ -232,12 +234,24 @@ export default function AddDataPageUI() {
         brokerId: property.brokerId || "", // Ensure brokerId is always a string
       };
 
-      // Save property to database
-      const response = await updatePropertyById(property.brokerId, id, propertyData);
-      toast.success("Property updated successfully!");
+      // Save property to database with promise-based toast
+      const response = await toastUtils.promise(
+        updatePropertyById(property.brokerId, id, propertyData),
+        {
+          loading: 'Updating your property...',
+          success: toastMessages.propertyUpdated,
+          error: toastMessages.propertyError,
+        }
+      );
+      
       console.log("Property response:", response);
 
       resetForm();
+      
+      // Redirect to properties page after successful update
+      setTimeout(() => {
+        router.push("/show-properties");
+      }, 1500);
     } catch (err) {
       console.error("Error:", err);
       handleSubmissionError(err);

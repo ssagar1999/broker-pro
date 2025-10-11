@@ -11,6 +11,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import useUserStore  from "../../lib/store/userStore"
 import { loginUser } from "../../lib/api/userApi"
+import { toastUtils, toastMessages } from "../../lib/utils/toast"
 
 export function AuthCard() {
   const router = useRouter()
@@ -24,31 +25,60 @@ export function AuthCard() {
 
    const onSubmit = async (e: React.FormEvent) => {  
     e.preventDefault();
-  let formData = { emailOrphone: form.emailOrphone, password: form.password };
+    setError(null);
+    
+    const formData = { emailOrphone: form.emailOrphone, password: form.password };
+    
     if (!form.emailOrphone || !form.password) {
-      setError("Please fill in all fields");
+      setError(toastMessages.requiredFields);
+      toastUtils.error(toastMessages.requiredFields);
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response = await loginUser(formData);
+      console.log("Logging in user:", formData);
+      
+      // Use promise-based toast for better UX
+      const response = await toastUtils.promise(
+        loginUser(formData),
+        {
+          loading: 'Signing you in...',
+          success: toastMessages.loginSuccess,
+          error: toastMessages.loginError,
+        }
+      );
+      
       console.log("Login response:", response);
       
-      // Use the login function from userStore instead of individual setters
+      // Use the login function from userStore
       useUserStore.getState().login({
         id: response.userId,
         token: response.token,
-        role: 'user'
+        role: response.role || 'user',
+        username: response.username || 'User'
       });
       
-      // Force a page reload to ensure cookies are properly set
-      // window.location.href = "/show-properties";
-      router.push("/show-properties");
+      // Redirect to properties page after successful login
+      setTimeout(() => {
+        router.push("/show-properties");
+      }, 1000); // Small delay to let user see success message
 
     } catch (error) {
       console.error("Login error:", error);
-      // Handle login error
-    } 
+      
+      // Handle specific error messages
+      let errorMessage = toastMessages.loginError;
+      if (error instanceof Error) {
+        errorMessage = error.message || toastMessages.loginError;
+      }
+      
+      setError(errorMessage);
+      toastUtils.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

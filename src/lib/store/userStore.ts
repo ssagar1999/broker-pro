@@ -7,6 +7,7 @@ interface AuthUser {
   id: string;
   token: string;
   role: 'broker' | 'admin' | 'user';
+  username: string;
 }
 
 interface Store {

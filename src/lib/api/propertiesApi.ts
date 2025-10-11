@@ -25,8 +25,23 @@ export const addProperty = async (propertyData: {
 };
 
 
-export const getAllProperties = async (brokerId: string | null) => {
-  return apiRequest('/properties/getProperties', 'POST', { brokerId });
+export const getAllProperties = async (
+  brokerId: string | null,
+  options: {
+    page?: number;
+    limit?: number;
+    searchQuery?: string;
+    statuses?: string[];
+    propertyTypes?: string[];
+    minPrice?: number | null;
+    maxPrice?: number | null;
+    sortBy?: string;
+  } = {}
+) => {
+  return apiRequest('/properties/getProperties', 'POST', { 
+    brokerId,
+    ...options
+  });
 };
 
 export const getPropertyById = async (brokerId: string | null, propertyId: string) => {

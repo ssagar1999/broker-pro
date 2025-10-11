@@ -1,14 +1,16 @@
 // components/layout/app-layout.tsx
 
 "use client"
-import { usePathname } from "next/navigation"  
+import { usePathname, useRouter } from "next/navigation"  
 import { ReactNode } from "react"
 import Link from "next/link"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Building2, Home, Plus, List, Settings, Bell, MessageSquare, Cloud, User } from "lucide-react"
+import { Building2, Home, Plus, List, Settings, Bell, MessageSquare, Cloud, User, LogOut } from "lucide-react"
+import useUserStore from "@/lib/store/userStore"
+import { toastUtils, toastMessages } from "@/lib/utils/toast"
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
@@ -24,6 +26,14 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, title = "Dashboard", description = "Manage your data here" }: AppLayoutProps) {
     const pathname = usePathname()
+    const router = useRouter()
+    const { user, logout } = useUserStore()
+
+    const handleLogout = () => {
+      logout()
+      toastUtils.success(toastMessages.logoutSuccess)
+      router.push("/")
+    }
   return (
     <SidebarProvider>
       <Sidebar>
@@ -60,12 +70,27 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
         <SidebarFooter className="border-t p-4">
           <div className="flex items-center gap-2">
             <Avatar className="size-8">
-              <AvatarFallback className="bg-primary text-xs text-primary-foreground">DU</AvatarFallback>
+              <AvatarFallback className="bg-primary text-xs text-primary-foreground">
+                {user?.username?.charAt(0)?.toUpperCase() || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-1 flex-col overflow-hidden">
-              <span className="truncate text-sm font-medium"> User</span>
-              {/* <span className="truncate text-xs text-muted-foreground">Pro</span> */}
+              <span className="truncate text-sm font-medium">
+                {user?.username || 'User'}
+              </span>
+              <span className="truncate text-xs text-muted-foreground">
+                {user?.role || 'Broker'}
+              </span>
             </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="size-8"
+              onClick={handleLogout}
+              title="Logout"
+            >
+              <LogOut className="size-4" />
+            </Button>
           </div>
         </SidebarFooter>
       </Sidebar>
@@ -96,6 +121,16 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
               <Button variant="ghost" size="icon" className="size-8">
                 <User className="size-4" />
                 <span className="sr-only">Profile</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="size-8"
+                onClick={handleLogout}
+                title="Logout"
+              >
+                <LogOut className="size-4" />
+                <span className="sr-only">Logout</span>
               </Button>
             </div>
           </div>
