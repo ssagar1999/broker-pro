@@ -14,9 +14,9 @@ import { toast } from "react-hot-toast";
 import { updatePropertyById } from "../../../lib/api/propertiesApi";
 import { usePropertiesStore } from "../../../lib/store/propertyStore";
 import { rooms } from "../../../lib/data/data";
-import AWS from "aws-sdk";
+import { uploadImagesToS3 } from "../../../lib/utils";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import { title } from "process";
+
 
 const propertyTypes = [
   "house",
@@ -203,10 +203,10 @@ export default function AddDataPageUI() {
     }
 
     // Check if images are selected
-    if (imageFiles.length === 0) {
-      setImageError("Please select at least one image");
-      hasErrors = true;
-    }
+    // if (imageFiles.length === 0) {
+    //   setImageError("Please select at least one image");
+    //   hasErrors = true;
+    // }
 
     // Update errors state
     setErrors(newErrors);
@@ -221,7 +221,7 @@ export default function AddDataPageUI() {
 
     try {
       // Upload images to S3
-      const imageUrls = await uploadImagesToS3(imageFiles);
+      const imageUrls = imageFiles.length === 0 ?  property.images : await uploadImagesToS3(imageFiles);
 
       // Prepare property data
       const propertyData = {
@@ -246,28 +246,7 @@ export default function AddDataPageUI() {
     }
   };
 
-  const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
-    const imageUrls: string[] = [];
-      const s3 = new AWS.S3({
-        accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
-        secretAccessKey: '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',
-        region: 'us-east-1',
-      });
 
-    for (const file of files) {
-      const params = {
-        Bucket: "propertiesimages",
-        Key: `properties/${Date.now()}_${file.name}`,
-        Body: file,
-        ContentType: file.type,
-      };
-
-      const uploadResult = await s3.upload(params).promise();
-      imageUrls.push(uploadResult.Location);
-    }
-
-    return imageUrls;
-  };
 
   const handleSubmissionError = (err: unknown) => {
     if (err instanceof Error) {

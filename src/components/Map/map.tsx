@@ -32,10 +32,10 @@ export default function GoogleMapPicker({ onLocationChange }: GoogleMapPickerPro
           onLocationChange(coords);
         },
         () => {
-          console.warn("Geolocation permission denied. Using default location.");
-          const defaultCoords = { lat: 40.7128, lng: -74.006 }; // New York default
-          setMarkerPosition(defaultCoords);
-          onLocationChange(defaultCoords);
+          // console.warn("Geolocation permission denied. Using default location.");
+          // const defaultCoords = { lat: 40.7128, lng: -74.006 }; // New York default
+          // setMarkerPosition(defaultCoords);
+          // onLocationChange(defaultCoords);
         }
       );
     }

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import AWS from "aws-sdk";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -46,4 +47,28 @@ export function getStatusBadgeStyles(status: string) {
       return ""
   }
 }
+
+
+  export const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
+    const imageUrls: string[] = [];
+      const s3 = new AWS.S3({
+        accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
+        secretAccessKey: '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',
+        region: 'us-east-1',
+      });
+
+    for (const file of files) {
+      const params = {
+        Bucket: "propertiesimages",
+        Key: `properties/${Date.now()}_${file.name}`,
+        Body: file,
+        ContentType: file.type,
+      };
+
+      const uploadResult = await s3.upload(params).promise();
+      imageUrls.push(uploadResult.Location);
+    }
+
+    return imageUrls;
+  };
 

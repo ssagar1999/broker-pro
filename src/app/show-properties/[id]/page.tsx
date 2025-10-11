@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { usePropertiesStore } from "../../../lib/store/propertyStore"
 import { formatPrice } from "../../../lib/utils" // add import
+import { AppLayout } from "@/components/layout/app-layout"
 
 export default function PropertyDetailsPage() {
   const params = useParams() as { id?: string }
@@ -66,26 +67,27 @@ export default function PropertyDetailsPage() {
     )
   }
 
-  if (!property) {
-    return (
-      <main className="container mx-auto px-4 py-12">
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center text-muted-foreground">No property found.</CardContent>
-        </Card>
-      </main>
-    )
-  }
+  // if (!property) {
+  //   return (
+  //     <main className="container mx-auto px-4 py-12">
+  //       <Card className="border-dashed">
+  //         <CardContent className="py-12 text-center text-muted-foreground">No property found.</CardContent>
+  //       </Card>
+  //     </main>
+  //   )
+  // }
 
-  const status = (property as any).status ?? "available"
-  const price = (property as any).price ?? 0
-  const title = (property as any).title ?? property?.location?.address ?? "Property"
+  const status = (property as any)?.status ?? "available"
+  const price = (property as any)?.price ?? 0
+  const title = (property as any)?.title ?? property?.location?.address ?? "Property"
   const address = property?.location?.address
   const city = property?.location?.locality || property?.location?.city
   const district = property?.location?.district
   const pincode = property?.location || 8989
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <AppLayout>
+          <main className="container mx-auto px-4 py-6">
       {/* Hero */}
       <section className="relative overflow-hidden rounded-xl border">
         <div className="relative w-full h-[280px] md:h-[420px]">
@@ -130,20 +132,20 @@ export default function PropertyDetailsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground">Bedrooms</CardTitle>
           </CardHeader>
-          <CardContent className="text-lg font-medium">{(property as any).bedrooms ?? "—"}</CardContent>
+          <CardContent className="text-lg font-medium">{(property as any)?.bedrooms ?? "—"}</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground">Bathrooms</CardTitle>
           </CardHeader>
-          <CardContent className="text-lg font-medium">{(property as any).bathrooms ?? "—"}</CardContent>
+          <CardContent className="text-lg font-medium">{(property as any)?.bathrooms ?? "—"}</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground">Area (sqft)</CardTitle>
           </CardHeader>
           <CardContent className="text-lg font-medium">
-            {(property as any).areaSqFt ?? (property as any).area ?? "—"}
+            {(property as any)?.areaSqFt ?? (property as any)?.area ?? "—"}
           </CardContent>
         </Card>
       </section>
@@ -155,7 +157,7 @@ export default function PropertyDetailsPage() {
             <CardTitle>Description</CardTitle>
           </CardHeader>
           <CardContent className="text-pretty leading-relaxed text-sm md:text-base text-foreground/90">
-            {(property as any).description ??
+            {(property as any)?.description ??
               "Details about this property will appear here. Contact the agent for more information."}
           </CardContent>
         </Card>
@@ -166,7 +168,7 @@ export default function PropertyDetailsPage() {
           </CardHeader>
           <CardContent>
             <ul className="grid gap-2 text-sm">
-              {Array.isArray((property as any).features) && (property as any).features.length > 0 ? (
+              {Array.isArray((property as any)?.features) && (property as any)?.features.length > 0 ? (
                 (property as any).features.map((f: string, idx: number) => (
                   <li key={idx} className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -218,5 +220,7 @@ export default function PropertyDetailsPage() {
         </div>
       </div>
     </main>
+    </AppLayout>
+
   )
 }

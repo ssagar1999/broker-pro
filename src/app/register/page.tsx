@@ -16,7 +16,7 @@ import {
 import { Building2, AlertCircle } from "lucide-react"
 import { toast } from "react-hot-toast"  // Optional for success and error messages
 import axios from "axios"  // Import axios for API calls
-import { registerUser } from "../../lib/api/userApi"; 
+import { registerUser } from "../../lib/api/userApi";
 
 
 export default function RegisterPageUI() {
@@ -54,7 +54,7 @@ export default function RegisterPageUI() {
 
     setLoading(true)
     try {
-        console.log(formData)
+      console.log(formData)
       // Call your API here for user registration
       const response = await registerUser(formData)
       // On success, you can handle the response and show a success message
@@ -153,9 +153,9 @@ export default function RegisterPageUI() {
             </div>
 
 
-   <div className="space-y-2">
-            
-           
+            <div className="space-y-2">
+
+
             </div>
 
 

@@ -12,7 +12,6 @@ import GoogleMapPicker from '../../components/Map/map'
 import { useState } from "react"
 import { toast } from "react-hot-toast"; // optional toast notifications
 import { addProperty } from "../../lib/api/propertiesApi";
-import { generateRandomProperty } from "./generaterandomproperty";
 import useUserStore from "@/lib/store/userStore"
 import { rooms } from "@/lib/constants/data"
 import AWS from 'aws-sdk';
@@ -31,6 +30,7 @@ const propertyTypes = [
 // import { DashboardNav } from "@/components/dashboard-nav"
 import { AlertCircle, CheckCircle } from "lucide-react"
 
+
 export default function AddDataPageUI() {
 
   const brokerId = useUserStore((s) => s.userId)
@@ -42,6 +42,8 @@ export default function AddDataPageUI() {
     address: "",
     brokerId: '',
     district: "",
+    title: "",
+    description:'',
     city:'',
     locality: "",
     landmark: "",
@@ -62,6 +64,9 @@ export default function AddDataPageUI() {
     address?: string;
     brokerId?: string;
     district?: string;
+    city?: string;  
+    title?: string;
+    description?: string;
     locality?: string;
     landmark?: string;
     pincode?: string;
@@ -250,6 +255,8 @@ export default function AddDataPageUI() {
       brokerId: '',
       address: "",
       district: "",
+      title: "",
+      description:'',
       locality: "",
       city:'',
       landmark: "",
@@ -268,18 +275,7 @@ export default function AddDataPageUI() {
 
 
 
-  const handleGenerate = () => {
-    const { propertyData, coordinates } = generateRandomProperty();
-    setFormData(propertyData);
-    setLocation(coordinates);
-  };
-
-
-
-
-
   return (
-
 
     <AppLayout title="Add New Data" description="Create a new entry for your broker records">
 
@@ -288,13 +284,7 @@ export default function AddDataPageUI() {
           <div className="mx-auto max-w-2xl">
             <div className="mb-6">
               <h1 className="mb-2 text-3xl font-bold">Add New Property</h1>
-              <button
-                type="button"
-                onClick={handleGenerate}
-                className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-              >
-                🎲 Generate Random Data
-              </button>
+         
               <p className="text-muted-foreground">Create a new entry for your broker records</p>
             </div>
 
@@ -506,10 +496,56 @@ export default function AddDataPageUI() {
                       />
                       {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="title">title <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="title" 
+                        name="title" 
+                        type="text" 
+                        placeholder="tile for property" 
+                        value={formData.title} 
+                        onChange={handleChange}
+             
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">description <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="description" 
+                        name="description" 
+                        type="text" 
+                        placeholder="description for property" 
+                        value={formData.description} 
+                        onChange={handleChange}
+             
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city">city <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="city" 
+                        name="city" 
+                        type="text" 
+                        placeholder="type city" 
+                        value={formData.city} 
+                        onChange={handleChange}
+             
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="pincode">pincode <span className="text-destructive">*</span></Label>
+                      <Input 
+                        id="pincode" 
+                        name="pincode" 
+                        type="number" 
+                        placeholder="pincode" 
+                        value={formData.pincode} 
+                        onChange={handleChange}
+                       className={errors.pincode ? "border-destructive" : ""} 
+                      />
+                      {errors.pincode && <p className="text-sm text-destructive">{errors.pincode}</p>}
+                    </div>
                   </div>
-
-
-
 
                   <div className="space-y-2">
                     <Label htmlFor="image">Property Image (Max 5)</Label>
