@@ -23,6 +23,7 @@ type Props = {
 }
 
 const ALL_STATUSES = ["available", "booked", "unavailable"]
+const ALL_PROPERTY_TYPES = ['house', 'apartment', 'office', 'shop', 'land', 'warehouse', 'other', 'pg', 'hostel', 'farmhouse', 'villa', 'duplex','studio', 'penthouse', 'residential plot', 'commercial plot' ]
 
 export function FiltersSheet({
   open,
@@ -66,11 +67,11 @@ export function FiltersSheet({
             </div>
           </div>
 
-          {uniquePropertyTypes.length > 0 && (
+        
             <div>
               <h3 className="mb-3 text-sm font-medium">Property Type</h3>
               <div className="space-y-2">
-                {uniquePropertyTypes.map((type) => (
+                {ALL_PROPERTY_TYPES.map((type) => (
                   <div key={type} className="flex items-center space-x-2">
                     <Checkbox
                       id={`type-${type}`}
@@ -87,7 +88,7 @@ export function FiltersSheet({
                 ))}
               </div>
             </div>
-          )}
+      
 
           <div>
             <h3 className="mb-3 text-sm font-medium">Price Range</h3>
