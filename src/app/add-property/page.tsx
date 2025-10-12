@@ -252,9 +252,9 @@ export default function AddDataPageUI() {
   // Helper function to handle submission errors
   const handleSubmissionError = (err: unknown) => {
     if (err instanceof Error) {
-      toast.error(err.message || "Failed to create property.");
+      toastUtils.error(err.message || "Failed to create property.");
     } else {
-      toast.error("Failed to create property.");
+      toastUtils.error("Failed to create property.");
     }
   };
 
