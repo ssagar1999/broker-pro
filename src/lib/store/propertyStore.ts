@@ -4,6 +4,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import type { Property } from "@/lib/api/types"
 import { getAllProperties, getPropertyById } from "@/lib/api/propertiesApi"
+import useUserStore from "./userStore"
 
 // ===== TYPE DEFINITIONS =====
 // These define what data structure we're working with
@@ -48,7 +49,7 @@ interface PropertiesState {
   // ===== ACTIONS (FUNCTIONS) =====
   // These are functions that can change the state
   fetchProperties: (brokerId: string | null, page?: number) => Promise<void>
-  fetchProperty: (propertyId: string, userId: string | null) => Promise<void>
+  fetchPropertyById: (propertyId: string, force:boolean) => Promise<void>
   fetchPropertiesWithSmartPagination: (brokerId: string | null) => Promise<void>
   setSearchQuery: (q: string) => void
   toggleStatus: (status: string) => void
@@ -168,12 +169,16 @@ export const usePropertiesStore = create<PropertiesState>()(
 
       // ===== FETCH INDIVIDUAL PROPERTY FUNCTION =====
       // This function loads a single property by ID
-      fetchProperty: async (propertyId, userId) => {
-        console.log("🔄 Starting to fetch property details...", { propertyId })
+    
+
+      // ===== FETCH PROPERTY BY ID FUNCTION =====
+      // This function loads a single property by ID (simplified version for edit page)
+      fetchPropertyById: async (propertyId, force = false) => {
+        console.log("🔄 Starting to fetch property by ID...", { propertyId })
         
         // Check if property is already cached
         const currentState = get()
-        if (currentState.detailsById[propertyId]) {
+        if (!force && currentState.detailsById[propertyId]) {
           console.log("✅ Property already cached, skipping fetch")
           return
         }
@@ -183,8 +188,11 @@ export const usePropertiesStore = create<PropertiesState>()(
         set({ isLoadingDetail: true, error: null })
         
         try {
-          if (!userId) {
-            console.log("❌ No user ID provided for fetching property")
+          // Get brokerId from user store
+          const brokerId = useUserStore.getState().userId
+          
+          if (!brokerId) {
+            console.log("❌ No broker ID found")
             set({ 
               isLoadingDetail: false, 
               error: "Please log in to view property details" 
@@ -194,7 +202,7 @@ export const usePropertiesStore = create<PropertiesState>()(
           
           // Call the API to get property details
           console.log("🌐 Calling API for property details...")
-          const property = await getPropertyById(userId, propertyId)
+          const property = await getPropertyById(brokerId, propertyId)
           
           console.log("✅ Property details received:", property)
           

@@ -37,24 +37,33 @@ import {
   Layers
 } from "lucide-react"
 import { toastUtils } from "../../../lib/utils/toast"
+import { Property } from "../../../lib/api/types"
 
 export default function PropertyDetailsPage() {
   const params = useParams() as { id?: string }
   const id = params?.id ?? ""
   const router = useRouter()
   const [isFavorite, setIsFavorite] = useState(false)
+  // const [property, setProperty] = useState<Property | null>(null)
 
-  const detailsById = usePropertiesStore((s) => s.detailsById || {})
+   const detailsById = usePropertiesStore((s) => s.detailsById || {})
   const isLoadingDetail = usePropertiesStore((s) => s.isLoadingDetail)
-  const fetchProperty = usePropertiesStore((s) => s.fetchProperty)
+  const fetchPropertyById= usePropertiesStore((s) => s.fetchPropertyById)
   const userId = useUserStore((s) => s.userId)
+   const property = detailsById[id]
 
-  const property = detailsById[id]
+
+  // useEffect(() => {
+  //   if (!id || !userId) return
+  //   if (!property) fetchPropertyById(id, true)
+  // }, [id, property, fetchPropertyById, userId])
 
   useEffect(() => {
     if (!id || !userId) return
-    if (!property) fetchProperty(id, userId)
-  }, [id, property, fetchProperty, userId])
+  
+    // Force fetch to make sure cache is fresh
+    fetchPropertyById(id, true)
+  }, [id, fetchPropertyById, userId])
 
   // Helper functions
   const handleShare = () => {

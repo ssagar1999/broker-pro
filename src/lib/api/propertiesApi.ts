@@ -48,25 +48,7 @@ export const getPropertyById = async (brokerId: string | null, propertyId: strin
   return apiRequest('/properties/getPropertyById', 'POST', { brokerId, propertyId });
 };
 
-export const updatePropertyById = async (brokerId: string , propertyId: string, propertyData:{
-    brokerId: string;
-    propertyType: string;
-    address: string;
-    ownerName: string;
-    ownerContact: string;
-    rooms: string;
-    district: string;
-    locality: string,
-    landmark: string,
-    area: number,
-    floors: number,
-    images: string[],
-    furnishing: string,
-    pincode: string,
-    price: number,
-    status: "available" | "booked" | "unavailable",
-    notes: string
-} ) => {
+export const updatePropertyById = async (brokerId: string , propertyId: string, propertyData: any) => {
   return apiRequest('/properties/updatePropertyById', 'POST', { brokerId, propertyId, propertyData });
 };
 

@@ -39,13 +39,13 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
       <Sidebar>
         {/* Sidebar Header */}
         <SidebarHeader className="border-b p-4">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-3">
             <div className="flex items-center justify-center rounded-lg bg-primary p-2">
               <Building2 className="text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold">BrokerPro</span>
-              <span className="text-xs text-muted-foreground">Creative Suite</span>
+              <span className="text-xl font-semibold text-gray-800">BrokerPro</span>
+              <span className="text-sm text-muted-foreground">Creative Suite</span>
             </div>
           </Link>
         </SidebarHeader>
@@ -56,9 +56,9 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
             {navigation.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild isActive={pathname === item.href}>
-                  <Link href={item.href}>
+                  <Link href={item.href} className="flex items-center gap-3 text-gray-700 hover:bg-gray-200 p-2 rounded-md">
                     <item.icon className="size-4" />
-                    <span>{item.name}</span>
+                    <span className="font-medium">{item.name}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -68,14 +68,14 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
 
         {/* Sidebar Footer */}
         <SidebarFooter className="border-t p-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Avatar className="size-8">
               <AvatarFallback className="bg-primary text-xs text-primary-foreground">
                 {user?.username?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-1 flex-col overflow-hidden">
-              <span className="truncate text-sm font-medium">
+              <span className="truncate text-sm font-medium text-gray-800">
                 {user?.username || 'User'}
               </span>
               <span className="truncate text-xs text-muted-foreground">
@@ -97,10 +97,10 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
 
       {/* Main Content with Optional Header */}
       <SidebarInset>
-        <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur">
+        <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-4 border-b bg-background/95 px-4 backdrop-blur-md">
           <SidebarTrigger />
           <div className="flex flex-1 items-center justify-between">
-            <h1 className="text-lg font-semibold">{title}</h1>
+            <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="size-8">
                 <Cloud className="size-4" />

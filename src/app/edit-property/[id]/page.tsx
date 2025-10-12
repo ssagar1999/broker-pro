@@ -59,12 +59,18 @@ export default function AddDataPageUI() {
     floors: 0,
     furnishing: "",
     price: 0,
-    status: "available" as "available" | "booked" | "unavailable",
+    status: "" ,
     notes: "",
   });
 
   const params = useParams() as { id?: string };
   const id = params?.id ?? "";
+
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  console.log(formData,);
+  const [loading, setLoading] = useState(false);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const detailsById = usePropertiesStore((s) => s.detailsById || {});
   const isLoadingDetail = usePropertiesStore((s) => !!s.isLoadingDetail);
@@ -74,11 +80,11 @@ export default function AddDataPageUI() {
 
   useEffect(() => {
     if (!id) return;
-    if (!property) fetchPropertyById(id);
+    if (!property) fetchPropertyById(id, true);
   }, [id, property, fetchPropertyById]);
 
   useEffect(() => {
-    if (property && !formData.ownerName) {
+    if (!property) return
       setFormData({
         ownerName: property.owner.name,
         ownerContact: property?.owner?.phoneNumber || "",
@@ -101,9 +107,16 @@ export default function AddDataPageUI() {
         status: property.status || "available",
         notes: property.notes || "",
       });
-    }
-  }, [property, formData]);
-
+      
+      // Set location if coordinates exist
+      if (property.location.coordinates) {
+        setLocation({
+          lat: property.location.coordinates[1], // latitude is second element
+          lng: property.location.coordinates[0]  // longitude is first element
+        });
+      }
+    
+  }, [property, formData.status, formData.propertyType, formData.rooms, property?.rooms,   property?.location.coordinates ]);
   const [errors, setErrors] = useState<{
     ownerName?: string;
     ownerContact?: string;
@@ -121,11 +134,8 @@ export default function AddDataPageUI() {
     price?: string;
     furnishing?: string;
   }>({});
+  
 
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imageError, setImageError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -161,9 +171,11 @@ export default function AddDataPageUI() {
       case "landmark":
         return value.length < 3 ? `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 3 characters` : value.length > 100 ? `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed 100 characters` : undefined;
       case "furnishing":
-      case "title":
-      case "description":
         return value.length > 50 ? "Furnishing details cannot exceed 50 characters" : undefined;
+      case "title":
+        return value.length < 3 ? "Title must be at least 3 characters" : value.length > 100 ? "Title cannot exceed 100 characters" : undefined;
+      case "description":
+        return value.length > 500 ? "Description cannot exceed 500 characters" : undefined;
       default:
         return undefined;
     }
@@ -189,13 +201,11 @@ export default function AddDataPageUI() {
     // Validate all fields
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "notes") return; // Notes are optional
-
-      const error = validateField(key, value);
-      console
-      if (error) {
-        newErrors[key] = error;
-        hasErrors = true;
-      }
+        const error = validateField(key, value);
+        if (error) {
+          newErrors[key] = error;
+          hasErrors = true;
+        }
     });
 
     // Check location
@@ -203,12 +213,6 @@ export default function AddDataPageUI() {
       toastUtils.error("Please set the location on the map.");
       hasErrors = true;
     }
-
-    // Check if images are selected
-    // if (imageFiles.length === 0) {
-    //   setImageError("Please select at least one image");
-    //   hasErrors = true;
-    // }
 
     // Update errors state
     setErrors(newErrors);
@@ -227,11 +231,36 @@ export default function AddDataPageUI() {
 
       // Prepare property data
       const propertyData = {
-        ...formData,
-        coordinates: location,
+        brokerId: property.brokerId || "",
+        propertyType: formData.propertyType,
+        address: formData.address,
+        ownerName: formData.ownerName,
+        ownerContact: formData.ownerContact,
+        rooms: formData.rooms,
+        district: formData.district,
+        locality: formData.locality,
+        landmark: formData.landmark,
+        area: formData.area,
+        floors: formData.floors,
         images: imageUrls,
-        category: "sale",
-        brokerId: property.brokerId || "", // Ensure brokerId is always a string
+        furnishing: formData.furnishing,
+        pincode: formData.pincode,
+        price: formData.price,
+        status: formData.status,
+        notes: formData.notes,
+        // Add location data
+        location: {
+          city: formData.city,
+          address: formData.address,
+          district: formData.district,
+          locality: formData.locality,
+          landmark: formData.landmark,
+          coordinates: location ? [Number(location.lng), Number(location.lat)] : undefined
+        },
+        // Add title and description
+        title: formData.title,
+        description: formData.description,
+        category: formData.category || "sale"
       };
 
       // Save property to database with promise-based toast
@@ -245,6 +274,7 @@ export default function AddDataPageUI() {
       );
       
       console.log("Property response:", response);
+      
 
       resetForm();
       
@@ -264,9 +294,9 @@ export default function AddDataPageUI() {
 
   const handleSubmissionError = (err: unknown) => {
     if (err instanceof Error) {
-      toast.error(err.message || "Failed to create property.");
+      toastUtils.error(err.message || "Failed to create property.");
     } else {
-      toast.error("Failed to create property.");
+      toastUtils.error("Failed to create property.");
     }
   };
 
@@ -299,18 +329,54 @@ export default function AddDataPageUI() {
   };
 
 
+  if (isLoadingDetail) {
+    return (
+      <AppLayout title="Edit Property" description="Edit the details of the property you want to update.">
+        <div className="min-h-screen bg-background">
+          <main className="container mx-auto px-4 py-2">
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-6">
+                <h1 className="mb-2 text-3xl font-bold">Edit Property</h1>
+                <p className="text-muted-foreground">Loading property details...</p>
+              </div>
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading property details...</p>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!property) {
+    return (
+      <AppLayout title="Edit Property" description="Edit the details of the property you want to update.">
+        <div className="min-h-screen bg-background">
+          <main className="container mx-auto px-4 py-2">
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-6">
+                <h1 className="mb-2 text-3xl font-bold">Edit Property</h1>
+                <p className="text-muted-foreground">Property not found.</p>
+              </div>
+            </div>
+          </main>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
-
-
     <AppLayout title="Edit Property" description="Edit the details of the property you want to update.">
-
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-2">
           <div className="mx-auto max-w-2xl">
             <div className="mb-6">
               <h1 className="mb-2 text-3xl font-bold">Edit Property</h1>
-          
-              <p className="text-muted-foreground">Edit the details of the property you want to update. </p>
+              <p className="text-muted-foreground">Edit the details of the property you want to update.</p>
             </div>
 
             <Card>
