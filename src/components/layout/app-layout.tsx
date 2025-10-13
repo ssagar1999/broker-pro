@@ -16,7 +16,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Add New Property", href: "/add-property", icon: Plus },
   { name: "View All Properties", href: "/all-properties", icon: List },
-  { name: "Property Analytics", href: "/analytics", icon: ChartLine },
+  // { name: "Property Analytics", href: "/analytics", icon: ChartLine },
 ]
 
 
