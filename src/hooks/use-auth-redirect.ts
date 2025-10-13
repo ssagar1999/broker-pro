@@ -12,7 +12,7 @@ export function useAuthRedirect(options: {
     requireAuth = false, 
     redirectTo = '/register', 
     redirectIfAuth = false,
-    redirectAuthTo = '/show-properties'
+    redirectAuthTo = '/all-properties'
   } = options;
   
   const router = useRouter();

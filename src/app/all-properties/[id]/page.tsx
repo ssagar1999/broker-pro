@@ -143,7 +143,7 @@ export default function PropertyDetailsPage() {
               <Button 
                 variant="outline" 
                 className="mt-4"
-                onClick={() => router.push('/show-properties')}
+                onClick={() => router.push('/all-properties')}
               >
                 Back to Properties
               </Button>

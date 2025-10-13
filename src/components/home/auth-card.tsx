@@ -62,7 +62,7 @@ export function AuthCard() {
       
       // Redirect to properties page after successful login
       setTimeout(() => {
-        router.push("/show-properties");
+        router.push("/all-properties");
       }, 1000); // Small delay to let user see success message
 
     } catch (error) {

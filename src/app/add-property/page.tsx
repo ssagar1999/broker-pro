@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation"
 import { addProperty } from "../../lib/api/propertiesApi";
 import useUserStore from "@/lib/store/userStore"
 import { toastUtils, toastMessages } from "../../lib/utils/toast"
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { rooms } from "@/lib/constants/data"
 import AWS from 'aws-sdk';
 
@@ -27,6 +28,8 @@ const propertyTypes = [
   'pg', 'hostel', 'farmhouse', 'villa', 'duplex', 'studio', 'penthouse',
   'residential plot', 'commercial plot'
 ];
+
+let furnishingTypes = ['Furnished', 'Semi-Furnished', 'Unfurnished']
 
 // import { DashboardNav } from "@/components/dashboard-nav"
 import { AlertCircle, CheckCircle } from "lucide-react"
@@ -56,6 +59,17 @@ export default function AddDataPageUI() {
     status: "available" as "available" | "booked" | "unavailable",
     notes: ""
   });
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
+  if (!browserSupportsSpeechRecognition) {
+    return <span>Browser doesn't support speech recognition.</span>;
+  }
 
   // Validation state for each field
   const [errors, setErrors] = useState<{
@@ -212,7 +226,7 @@ export default function AddDataPageUI() {
       
       // Redirect to properties page after successful submission
       setTimeout(() => {
-        router.push("/show-properties");
+        router.push("/all-properties");
       }, 1500);
     } catch (err) {
       console.error('Error:', err);
@@ -407,17 +421,19 @@ export default function AddDataPageUI() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="furnishing">Furnishing <span className="text-destructive">*</span></Label>
-                      <Input 
-                        id="furnishing" 
-                        name='furnishing' 
-                        placeholder="semi-furnished" 
-                        value={formData.furnishing} 
-                        onChange={handleChange}
-                        className={errors.furnishing ? "border-destructive" : ""} 
-                      />
-                      {errors.furnishing && <p className="text-sm text-destructive">{errors.furnishing}</p>}
+                      <Label htmlFor="furnishing">Furnishing</Label>
+                      <Select name="furnishing" onValueChange={(val) => setFormData(prev => ({ ...prev, furnishing: val as'Furnished' | 'Semi-Furnished' | 'Unfurnished' }))} value={formData.furnishing}>
+                        <SelectTrigger id="furnishing">
+                          <SelectValue placeholder="Select furnishing" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Furnished">Furnished</SelectItem>
+                          <SelectItem value="Semi-Furnished">Semi-Furnished</SelectItem>
+                          <SelectItem value="Unfurnished">Unfurnished</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+
 
 
                     <div className="space-y-2">
@@ -528,11 +544,18 @@ export default function AddDataPageUI() {
                         name="description" 
                         type="text" 
                         placeholder="description for property" 
-                        value={formData.description} 
+                        value={formData.description || transcript} 
                         onChange={handleChange}
              
                       />
                     </div>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      type="button"
+                      onClick={() => SpeechRecognition.startListening()}
+                    >
+                      Start
+                    </button>
                     <div className="space-y-2">
                       <Label htmlFor="city">city <span className="text-destructive">*</span></Label>
                       <Input 
@@ -581,7 +604,16 @@ export default function AddDataPageUI() {
 
                   <div className="space-y-2">
                     <Label htmlFor="notes">Notes</Label>
-                    <Textarea id="notes" name="notes" placeholder="Additional information..." rows={4} value={formData.notes} onChange={handleChange} />
+                    <Textarea
+                      id="notes"
+                      name="notes"
+                      placeholder="Additional information..."
+                      rows={4}
+                      value={formData.notes || transcript}
+                      onChange={handleChange}
+                    />
+                 
+               
                   </div>
 
                   <div className="flex gap-3">

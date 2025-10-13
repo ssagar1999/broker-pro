@@ -280,7 +280,7 @@ export default function AddDataPageUI() {
       
       // Redirect to properties page after successful update
       setTimeout(() => {
-        router.push("/show-properties");
+        router.push("/all-properties");
       }, 1500);
     } catch (err) {
       console.error("Error:", err);

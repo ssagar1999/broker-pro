@@ -8,15 +8,17 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader, Si
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Building2, Home, Plus, List, Settings, Bell, MessageSquare, Cloud, User, LogOut } from "lucide-react"
+import { Building2, Home, Plus, List, ChartLine, Bell, MessageSquare, Cloud, User, LogOut } from "lucide-react"
 import useUserStore from "@/lib/store/userStore"
 import { toastUtils, toastMessages } from "@/lib/utils/toast"
 
 const navigation = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "Add Data", href: "/add-property", icon: Plus },
-  { name: "View Data", href: "/show-properties", icon: List },
+  { name: "Dashboard", href: "/", icon: Home },
+  { name: "Add New Property", href: "/add-property", icon: Plus },
+  { name: "View All Properties", href: "/all-properties", icon: List },
+  { name: "Property Analytics", href: "/analytics", icon: ChartLine },
 ]
+
 
 interface AppLayoutProps {
   children: ReactNode
@@ -38,17 +40,18 @@ export function AppLayout({ children, title = "Dashboard", description = "Manage
     <SidebarProvider>
       <Sidebar>
         {/* Sidebar Header */}
-        <SidebarHeader className="border-b p-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex items-center justify-center rounded-lg bg-primary p-2">
-              <Building2 className="text-primary-foreground" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-semibold text-gray-800">BrokerPro</span>
-              <span className="text-sm text-muted-foreground">Creative Suite</span>
-            </div>
-          </Link>
-        </SidebarHeader>
+        <SidebarHeader className="border-b p-6">  {/* Increased padding for more space */}
+  <Link href="/" className="flex items-center gap-4">  {/* Increased gap for more space between elements */}
+    <div className="flex items-center justify-center rounded-lg bg-primary p-3"> {/* Bigger icon space */}
+      <Building2 className="text-primary-foreground" size={30} />  {/* Adjusted size for better balance */}
+    </div>
+    <div className="flex flex-col">
+      <span className="text-2xl font-semibold text-gray-800">BrokerPro</span> {/* Bigger title */}
+      <span className="text-sm text-muted-foreground mt-1">Creative Suite</span> {/* Added margin for subtitle spacing */}
+    </div>
+  </Link>
+</SidebarHeader>
+
 
         {/* Sidebar Menu */}
         <SidebarContent>

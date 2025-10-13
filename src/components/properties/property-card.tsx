@@ -73,7 +73,7 @@ export function PropertyCard({ item, isFavorite, onToggleFavorite, onDelete }: P
         {/* {item?.notes && <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">{item.notes}</p>} */}
 
         <div className="mt-4 flex gap-2">
-          <Button onClick={() => router.push(`/show-properties/${item._id}`)} variant="outline" size="sm" className="flex-1 bg-transparent" >
+          <Button onClick={() => router.push(`/all-properties/${item._id}`)} variant="outline" size="sm" className="flex-1 bg-transparent" >
             View Details
           </Button>
           <Button
