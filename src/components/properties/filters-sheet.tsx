@@ -13,7 +13,7 @@ type Props = {
   onToggleStatus: (s: string) => void
 
   selectedPropertyTypes: string[]
-  uniquePropertyTypes: string[]
+
   onTogglePropertyType: (t: string) => void
 
   priceRange: { min: string; max: string }
@@ -31,7 +31,6 @@ export function FiltersSheet({
   selectedStatuses,
   onToggleStatus,
   selectedPropertyTypes,
-  uniquePropertyTypes,
   onTogglePropertyType,
   priceRange,
   onPriceRangeChange,

@@ -69,28 +69,28 @@ export default function PropertiesPage() {
   const debouncedSearch = useDebounce(filters.searchQuery, 500)
 
   // property types list - we'll get this from the current properties
-  const uniquePropertyTypes = useMemo(
-    () => Array.from(new Set((properties || []).map((p) => p.propertyType))).filter(Boolean) as string[],
-    [properties],
-  )
+  // const uniquePropertyTypes = useMemo(
+  //   () => Array.from(new Set((properties || []).map((p) => p.propertyType))).filter(Boolean) as string[],
+  //   [properties],
+  // )
 
   // Update search query when debounced value changes
-  useEffect(() => {
-    if (debouncedSearch !== filters.searchQuery) {
-      setSearchQuery(debouncedSearch)
-      // Trigger smart pagination when search changes
-      if (userId) {
-        fetchPropertiesWithSmartPagination(userId)
-      }
-    }
-  }, [debouncedSearch, filters.searchQuery, setSearchQuery, fetchPropertiesWithSmartPagination, userId])
+  // useEffect(() => {
+  //   if (debouncedSearch !== filters.searchQuery) {
+  //     setSearchQuery(debouncedSearch)
+  //     // Trigger smart pagination when search changes
+  //     if (userId) {
+  //       fetchPropertiesWithSmartPagination(userId)
+  //     }
+  //   }
+  // }, [debouncedSearch, filters.searchQuery, setSearchQuery, fetchPropertiesWithSmartPagination, userId])
 
   // Refetch when filters change (except search which is handled by debounce)
   useEffect(() => {
     if (userId) {
       fetchPropertiesWithSmartPagination(userId)
     }
-  }, [filters.statuses, filters.propertyTypes, filters.minPrice, filters.maxPrice, filters.sortBy, fetchPropertiesWithSmartPagination, userId])
+  }, [filters.statuses, filters.searchQuery,filters.propertyTypes, filters.minPrice, filters.maxPrice, filters.sortBy, fetchPropertiesWithSmartPagination, userId])
 
   const activeFilterCount =
     filters.statuses.length +
@@ -169,7 +169,7 @@ export default function PropertiesPage() {
           selectedStatuses={filters.statuses}
           onToggleStatus={(s) => toggleStatus(s)}
           selectedPropertyTypes={filters.propertyTypes}
-          uniquePropertyTypes={uniquePropertyTypes}
+          // uniquePropertyTypes={uniquePropertyTypes}
           onTogglePropertyType={(t) => togglePropertyType(t)}
           priceRange={priceRangeStrings}
           onPriceRangeChange={setPriceRangeStrings}
