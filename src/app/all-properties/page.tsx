@@ -65,27 +65,9 @@ export default function PropertiesPage() {
     setPriceRange(min, max)
   }, [priceRangeStrings, setPriceRange])
 
-  // debounce search to reduce API calls
-  const debouncedSearch = useDebounce(filters.searchQuery, 500)
 
-  // property types list - we'll get this from the current properties
-  // const uniquePropertyTypes = useMemo(
-  //   () => Array.from(new Set((properties || []).map((p) => p.propertyType))).filter(Boolean) as string[],
-  //   [properties],
-  // )
 
-  // Update search query when debounced value changes
-  // useEffect(() => {
-  //   if (debouncedSearch !== filters.searchQuery) {
-  //     setSearchQuery(debouncedSearch)
-  //     // Trigger smart pagination when search changes
-  //     if (userId) {
-  //       fetchPropertiesWithSmartPagination(userId)
-  //     }
-  //   }
-  // }, [debouncedSearch, filters.searchQuery, setSearchQuery, fetchPropertiesWithSmartPagination, userId])
 
-  // Refetch when filters change (except search which is handled by debounce)
   useEffect(() => {
     if (userId) {
       fetchPropertiesWithSmartPagination(userId)
