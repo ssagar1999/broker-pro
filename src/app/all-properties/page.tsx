@@ -10,16 +10,17 @@ import { FiltersSheet } from "../../components/properties/filters-sheet"
 import { ActiveFiltersBar } from "../../components/properties/active-filters"
 import { PropertySkeletonGrid } from "../../components/properties/property-skeletogrid"
 import { Pagination } from "../../components/properties/pagination"
-import { useDebounce } from "../../hooks/use-debounce"
+
+
 import useUserStore from "@/lib/store/userStore"
 import { usePropertiesStore } from "../../lib/store/propertyStore"
-import type { Property } from "@/lib/api/types";
+
 import { AppLayout } from "@/components/layout/app-layout";
 import { toastUtils, toastMessages } from "../../lib/utils/toast";
 
 
 export default function PropertiesPage() {
-    const router = useRouter();
+  const router = useRouter();
   // brokerId from auth store
   const userId = useUserStore((s) => s.userId)
   // properties state and actions from zustand
@@ -46,8 +47,9 @@ export default function PropertiesPage() {
 
   // fetch on mount and when broker changes
   useEffect(() => {
+
     if (userId) {
-      fetchProperties(userId)
+      fetchPropertiesWithSmartPagination(userId)
     }
   }, [fetchProperties, userId])
 
@@ -66,13 +68,11 @@ export default function PropertiesPage() {
   }, [priceRangeStrings, setPriceRange])
 
 
-
-
   useEffect(() => {
     if (userId) {
       fetchPropertiesWithSmartPagination(userId)
     }
-  }, [filters.statuses, filters.searchQuery,filters.propertyTypes, filters.minPrice, filters.maxPrice, filters.sortBy, fetchPropertiesWithSmartPagination, userId])
+  }, [filters.statuses, filters.searchQuery, filters.propertyTypes, filters.minPrice, filters.maxPrice, filters.sortBy, fetchPropertiesWithSmartPagination, userId])
 
   const activeFilterCount =
     filters.statuses.length +
@@ -82,152 +82,152 @@ export default function PropertiesPage() {
   const clearPriceRange = useCallback(() => setPriceRangeStrings({ min: "", max: "" }), [])
 
   const handleDelete = useCallback(
-    (id: string) => {
-      if (confirm("Are you sure you want to delete this property? This action cannot be undone.")) {
+    (propertyId: string, brokerId:string) => {
+  
         try {
           // Optimistic removal in store
-          removeProperty(id)
+          removeProperty(propertyId, brokerId)
           toastUtils.success(toastMessages.propertyDeleted)
         } catch (error) {
           console.error("Delete error:", error)
           toastUtils.error("Failed to delete property. Please try again.")
         }
-      }
+      
     },
     [removeProperty],
   )
 
   return (
     <AppLayout>
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="mb-2 text-balance text-3xl font-bold">Properties</h1>
-            <p className="text-muted-foreground">
-              {pagination ? (
-                <>Showing {properties.length} of {pagination.totalCount} properties
-                {pagination.currentPage > 1 && (
-                  <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    Page {pagination.currentPage}
-                  </span>
+      <div className="min-h-screen bg-background">
+        <main className="container mx-auto px-4 py-8">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="mb-2 text-balance text-3xl font-bold">Properties</h1>
+              <p className="text-muted-foreground">
+                {pagination ? (
+                  <>Showing {properties.length} of {pagination.totalCount} properties
+                    {pagination.currentPage > 1 && (
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        Page {pagination.currentPage}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>Loading properties...</>
                 )}
-                </>
-              ) : (
-                <>Loading properties...</>
-              )}
-            </p>
+              </p>
+            </div>
+            <Button onClick={() => router.push("/add-property")}>Add New Property</Button>
           </div>
-          <Button onClick={() => router.push("/add-property" )}>Add New Property</Button>
-        </div>
 
-        <Toolbar
-          searchQuery={filters.searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          sortBy={filters.sortBy}
-          onSortByChange={(v) => setSortBy(v)}
-          activeFilterCount={activeFilterCount}
-          onOpenFilters={() => setFilterSheetOpen(true)}
-        />
+          <Toolbar
+            searchQuery={filters.searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            sortBy={filters.sortBy}
+            onSortByChange={(v) => setSortBy(v)}
+            activeFilterCount={activeFilterCount}
+            onOpenFilters={() => setFilterSheetOpen(true)}
+          />
 
-        {activeFilterCount > 0 && (
-          <ActiveFiltersBar
+          {activeFilterCount > 0 && (
+            <ActiveFiltersBar
+              selectedStatuses={filters.statuses}
+              selectedPropertyTypes={filters.propertyTypes}
+              priceRange={priceRangeStrings}
+              onRemoveStatus={(s) => toggleStatus(s)}
+              onRemoveType={(t) => togglePropertyType(t)}
+              onClearPrice={clearPriceRange}
+              onClearAll={() => {
+                clearFilters()
+                setPriceRangeStrings({ min: "", max: "" })
+              }}
+            />
+          )}
+
+          <FiltersSheet
+            open={filterSheetOpen}
+            onOpenChange={setFilterSheetOpen}
             selectedStatuses={filters.statuses}
+            onToggleStatus={(s) => toggleStatus(s)}
             selectedPropertyTypes={filters.propertyTypes}
+            // uniquePropertyTypes={uniquePropertyTypes}
+            onTogglePropertyType={(t) => togglePropertyType(t)}
             priceRange={priceRangeStrings}
-            onRemoveStatus={(s) => toggleStatus(s)}
-            onRemoveType={(t) => togglePropertyType(t)}
-            onClearPrice={clearPriceRange}
+            onPriceRangeChange={setPriceRangeStrings}
             onClearAll={() => {
               clearFilters()
               setPriceRangeStrings({ min: "", max: "" })
             }}
           />
-        )}
 
-        <FiltersSheet
-          open={filterSheetOpen}
-          onOpenChange={setFilterSheetOpen}
-          selectedStatuses={filters.statuses}
-          onToggleStatus={(s) => toggleStatus(s)}
-          selectedPropertyTypes={filters.propertyTypes}
-          // uniquePropertyTypes={uniquePropertyTypes}
-          onTogglePropertyType={(t) => togglePropertyType(t)}
-          priceRange={priceRangeStrings}
-          onPriceRangeChange={setPriceRangeStrings}
-          onClearAll={() => {
-            clearFilters()
-            setPriceRangeStrings({ min: "", max: "" })
-          }}
-        />
-
-        <div className="mt-6">
-          {!userId ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground mb-4">Please log in to view your properties.</p>
-                <Button onClick={() => router.push("/register")}>Go to Login</Button>
-              </CardContent>
-            </Card>
-          ) : loading ? (
-            <PropertySkeletonGrid />
-          ) : error ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground">Failed to load properties.</p>
-                <p className="text-sm text-muted-foreground mt-2">{error}</p>
-              </CardContent>
-            </Card>
-          ) : (properties || []).length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="mb-4 text-muted-foreground">
-                  {pagination?.totalCount === 0 ? "No properties yet" : "No properties match your current filters"}
-                </p>
-                {pagination?.totalCount === 0 ? (
-                  <Button onClick={() => router.push("/add-property")}>Add Your First Property</Button>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm text-muted-foreground text-center">
-                      Try adjusting your filters or search terms to find more properties.
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        clearFilters()
-                        setPriceRangeStrings({ min: "", max: "" })
-                      }}
-                    >
-                      Clear All Filters
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <PropertiesGrid
-                items={properties}
-                favorites={favorites}
-                onToggleFavorite={toggleFavorite}
-                onDelete={handleDelete}
-              />
-              {pagination && (
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  totalPages={pagination.totalPages}
-                  onPageChange={(page) => setCurrentPage(page, userId)}
-                  hasNextPage={pagination.hasNextPage}
-                  hasPrevPage={pagination.hasPrevPage}
+          <div className="mt-6">
+            {!userId ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <p className="text-muted-foreground mb-4">Please log in to view your properties.</p>
+                  <Button onClick={() => router.push("/register")}>Go to Login</Button>
+                </CardContent>
+              </Card>
+            ) : loading ? (
+              <PropertySkeletonGrid />
+            ) : error ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <p className="text-muted-foreground">Failed to load properties.</p>
+                  <p className="text-sm text-muted-foreground mt-2">{error}</p>
+                </CardContent>
+              </Card>
+            ) : (properties || []).length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <p className="mb-4 text-muted-foreground">
+                    {pagination?.totalCount === 0 ? "No properties yet" : "No properties match your current filters"}
+                  </p>
+                  {pagination?.totalCount === 0 ? (
+                    <Button onClick={() => router.push("/add-property")}>Add Your First Property</Button>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm text-muted-foreground text-center">
+                        Try adjusting your filters or search terms to find more properties.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          clearFilters()
+                          setPriceRangeStrings({ min: "", max: "" })
+                        }}
+                      >
+                        Clear All Filters
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <PropertiesGrid
+                  items={properties}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavorite}
+                  onDelete={handleDelete}
                 />
-              )}
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+                {pagination && (
+                  <Pagination
+                    currentPage={pagination.currentPage}
+                    totalPages={pagination.totalPages}
+                    onPageChange={(page) => setCurrentPage(page, userId)}
+                    hasNextPage={pagination.hasNextPage}
+                    hasPrevPage={pagination.hasPrevPage}
+                  />
+                )}
+              </>
+            )}
+          </div>
+        </main>
+      </div>
 
 
-      </AppLayout>
+    </AppLayout>
   )
 }

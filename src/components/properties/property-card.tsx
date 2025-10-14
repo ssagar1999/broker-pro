@@ -7,11 +7,13 @@ import { Calendar, Heart, MapPin, Star, Trash2 } from "lucide-react"
 import type { Property } from "@/lib/api/types"
 import { formatDate, formatPrice, getStatusBadgeStyles } from "../../lib/utils"
 import { useRouter } from "next/navigation"
+import { Modal } from "@/components/modal/modal";
+
 type Props = {
   item: Property
   isFavorite: boolean
   onToggleFavorite: (id: string) => void
-  onDelete: (id: string) => void
+  onDelete: (propertyId: string, brokerId:string) => void
 }
 
 export function PropertyCard({ item, isFavorite, onToggleFavorite, onDelete }: Props) {
@@ -76,15 +78,18 @@ export function PropertyCard({ item, isFavorite, onToggleFavorite, onDelete }: P
           <Button onClick={() => router.push(`/all-properties/${item._id}`)} variant="outline" size="sm" className="flex-1 bg-transparent" >
             View Details
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(item._id)}
-            aria-label="Delete property"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+     
+          <Modal
+  handleClick={() => onDelete(item._id, item.brokerId)}
+  titleText="Delete Property"
+  descriptionText="Are you sure you want to delete this property? This action cannot be undone."
+  Icon={<Trash2 />}
+  primaryButtonText="Delete"
+  secondaryButtonText="Cancel"
+  
+/>
+
+
         </div>
       </CardContent>
     </Card>

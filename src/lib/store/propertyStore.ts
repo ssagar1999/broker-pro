@@ -3,7 +3,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import type { Property } from "@/lib/api/types"
-import { getAllProperties, getPropertyById } from "@/lib/api/propertiesApi"
+import { getAllProperties, getPropertyById, deletePropertyById } from "@/lib/api/propertiesApi"
 import useUserStore from "./userStore"
 
 // ===== TYPE DEFINITIONS =====
@@ -58,7 +58,7 @@ interface PropertiesState {
   clearFilters: () => void
   setSortBy: (sort: SortBy) => void
   toggleFavorite: (id: string) => void
-  removeProperty: (id: string) => void
+  removeProperty: (propertyId: string, brokerId:string) => void
   setCurrentPage: (page: number, brokerId?: string | null) => void
 }
 
@@ -358,6 +358,7 @@ export const usePropertiesStore = create<PropertiesState>()(
       // Update search text
       setSearchQuery: (searchText) => {
         console.log("🔍 Setting search query:", searchText)
+  
         set((currentState) => ({ 
           filters: { ...currentState.filters, searchQuery: searchText }
           // Don't reset page here - let smart pagination handle it
@@ -442,6 +443,7 @@ export const usePropertiesStore = create<PropertiesState>()(
           // Don't reset page here - let smart pagination handle it
         }))
       },
+
       
       // Set sorting option
       setSortBy: (sortOption) => {
@@ -485,8 +487,10 @@ export const usePropertiesStore = create<PropertiesState>()(
       },
       
       // ===== REMOVE PROPERTY FUNCTION =====
-      removeProperty: (propertyId) => {
+      removeProperty: async (propertyId, brokerId) => {
         console.log("🗑️ Removing property:", propertyId)
+             
+        await deletePropertyById(propertyId,brokerId)
         set((currentState) => ({
           properties: currentState.properties.filter((property) => property._id !== propertyId)
         }))

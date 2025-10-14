@@ -7,7 +7,7 @@ type Props = {
   items: Property[]
   favorites: Set<string>
   onToggleFavorite: (id: string) => void
-  onDelete: (id: string) => void
+  onDelete: (propertyId: string, brokerId:string) => void
 }
 
 export function PropertiesGrid({ items, favorites, onToggleFavorite, onDelete }: Props) {

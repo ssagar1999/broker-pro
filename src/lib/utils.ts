@@ -72,3 +72,32 @@ export function getStatusBadgeStyles(status: string) {
     return imageUrls;
   };
 
+    // Validation functions
+    export const validateField = (name: string, value: any): string | undefined => {
+      switch (name) {
+        case 'ownerName':
+          return value.length < 2 ? 'Name must be at least 2 characters' : 
+                 value.length > 50 ? 'Name cannot exceed 50 characters' : undefined;
+        case 'ownerContact':
+          return !/^\d{10}$/.test(value) ? 'Contact must be exactly 10 digits' : undefined;
+        case 'price':
+          return isNaN(Number(value)) || Number(value) <= 0 ? 'Price must be a positive number' : undefined;
+        case 'area':
+          return isNaN(Number(value)) || Number(value) <= 0 ? 'Area must be a positive number' : undefined;
+        case 'floors':
+          return isNaN(Number(value)) || Number(value) < 0 ? 'Floors must be a non-negative number' : undefined;
+        case 'pincode':
+          return !/^\d{6}$/.test(value) ? 'Pincode must be exactly 6 digits' : undefined;
+        case 'address':
+        case 'district':
+        case 'locality':
+        case 'landmark':
+          return value.length < 3 ? `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 3 characters` : 
+                 value.length > 100 ? `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed 100 characters` : undefined;
+        case 'furnishing':
+          return value.length > 50 ? 'Furnishing details cannot exceed 50 characters' : undefined;
+        default:
+          return undefined;
+      }
+    };
+

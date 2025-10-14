@@ -16,8 +16,7 @@ import useUserStore from "@/lib/store/userStore"
 import { toastUtils, toastMessages } from "../../lib/utils/toast"
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { rooms } from "@/lib/constants/data"
-import AWS from 'aws-sdk';
-
+import { uploadImagesToS3, validateField } from '../../lib/utils'
 
 
 // inside your component
@@ -111,34 +110,7 @@ export default function AddDataPageUI() {
     }
   };
   
-  // Validation functions
-  const validateField = (name: string, value: any): string | undefined => {
-    switch (name) {
-      case 'ownerName':
-        return value.length < 2 ? 'Name must be at least 2 characters' : 
-               value.length > 50 ? 'Name cannot exceed 50 characters' : undefined;
-      case 'ownerContact':
-        return !/^\d{10}$/.test(value) ? 'Contact must be exactly 10 digits' : undefined;
-      case 'price':
-        return isNaN(Number(value)) || Number(value) <= 0 ? 'Price must be a positive number' : undefined;
-      case 'area':
-        return isNaN(Number(value)) || Number(value) <= 0 ? 'Area must be a positive number' : undefined;
-      case 'floors':
-        return isNaN(Number(value)) || Number(value) < 0 ? 'Floors must be a non-negative number' : undefined;
-      case 'pincode':
-        return !/^\d{6}$/.test(value) ? 'Pincode must be exactly 6 digits' : undefined;
-      case 'address':
-      case 'district':
-      case 'locality':
-      case 'landmark':
-        return value.length < 3 ? `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 3 characters` : 
-               value.length > 100 ? `${name.charAt(0).toUpperCase() + name.slice(1)} cannot exceed 100 characters` : undefined;
-      case 'furnishing':
-        return value.length > 50 ? 'Furnishing details cannot exceed 50 characters' : undefined;
-      default:
-        return undefined;
-    }
-  };
+
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -236,32 +208,7 @@ export default function AddDataPageUI() {
     }
   };
 
-  // Helper function to upload images to S3
-  const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
-    const imageUrls: string[] = [];
-    
-    // Initialize S3 SDK with environment variables
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIASTHTHQ7K2L2AF3ON',
-      secretAccessKey: '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',
-      region: 'us-east-1',
-    });
-
-    // Upload each image to S3
-    for (const file of files) {
-      const params = {
-        Bucket: "propertiesimages",
-        Key: `properties/${Date.now()}_${file.name}`,
-        Body: file,
-        ContentType: file.type,
-      };
-
-      const uploadResult = await s3.upload(params).promise();
-      imageUrls.push(uploadResult.Location);
-    }
-    
-    return imageUrls;
-  };
+  
 
   // Helper function to handle submission errors
   const handleSubmissionError = (err: unknown) => {

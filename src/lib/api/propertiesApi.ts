@@ -48,6 +48,9 @@ export const getPropertyById = async (brokerId: string | null, propertyId: strin
   return apiRequest('/properties/getPropertyById', 'POST', { brokerId, propertyId });
 };
 
+export const deletePropertyById = async (propertyId: string , brokerId: string) => {
+  return apiRequest('/properties/deletePropertyById', 'POST', { propertyId, brokerId });
+};
 export const updatePropertyById = async (brokerId: string , propertyId: string, propertyData: any) => {
   return apiRequest('/properties/updatePropertyById', 'POST', { brokerId, propertyId, propertyData });
 };
