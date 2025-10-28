@@ -135,7 +135,7 @@ export function AuthCard() {
         <p className="text-center text-xs text-muted-foreground">
           New to the app?{" "}
           <Link href="/register" className="text-foreground hover:underline">
-            Create an account
+            Create an account.
           </Link>
         </p>
       </form>
