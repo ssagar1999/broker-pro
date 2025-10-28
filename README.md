@@ -1,36 +1,4 @@
 
-```markdown
-# 🌸 Open Source Interested Club — Contribution Guide
-
-Welcome to the **Club Repository** 🎉  
-This repo is for all members of our dev club to learn, collaborate, and make their first open-source contributions.
-
----
-
-## 🚀 Getting Started
-
-Follow these steps carefully to contribute to this project.  
-Don’t worry — if you’re new to open source, this will be your perfect first PR!
-
----
-
-### 🪞 1. Fork this repository
-
-- Click the **Fork** button (top-right corner of this repo).  
-- This creates a copy of the repository in **your own GitHub account**.
-
-Your forked repo URL will look like this:  
-`https://github.com/<your-username>/<repo-name>`
-
----
-
-### 💻 2. Clone your fork
-
-Now bring your forked repo to your local machine:
-
-```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-```
 
 Move into the project folder:
 
