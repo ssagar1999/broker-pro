@@ -1,22 +1,20 @@
 
----
-
 ````markdown
-#  Open Source Interested Club — Contribution Guide
+# 🌸 Open Source Interested Club — Contribution Guide
 
-Welcome to the **Club Repository**  
+Welcome to the **Club Repository** 🎉  
 This repo is for all members of our dev club to learn, collaborate, and make their first open-source contributions.
 
 ---
 
-##  Getting Started
+## 🚀 Getting Started
 
 Follow these steps carefully to contribute to this project.  
 Don’t worry — if you’re new to open source, this will be your perfect first PR!
 
 ---
 
-###  1. Fork this repository
+### 🪞 1. Fork this repository
 
 - Click the **Fork** button (top-right corner of this repo).  
 - This creates a copy of the repository in **your own GitHub account**.
@@ -42,7 +40,7 @@ cd <repo-name>
 
 ---
 
-###  3. Add the original repo as upstream (important)
+### 🔗 3. Add the original repo as upstream (important)
 
 This keeps your fork updated with the latest changes from the main project.
 
@@ -60,7 +58,7 @@ You should see two remotes — `origin` (your fork) and `upstream` (main repo).
 
 ---
 
-###  4. Create a new branch
+### 🌱 4. Create a new branch
 
 Before making any changes, create a new branch:
 
@@ -76,7 +74,7 @@ Use meaningful branch names such as:
 
 ---
 
-###  5. Make your changes
+### ✏️ 5. Make your changes
 
 Now open the project in your code editor (like VS Code):
 
@@ -114,7 +112,7 @@ git commit -m "Added my profile card (Your Name)"
 
 ---
 
-### 7. Push your branch to your fork
+### 🚀 7. Push your branch to your fork
 
 Now push the branch to your forked repository:
 
@@ -124,14 +122,14 @@ git push origin add-my-profile
 
 ---
 
-###  8. Create a Pull Request (PR)
+### 🪄 8. Create a Pull Request (PR)
 
 1. Go to your fork on GitHub.
 2. Click **“Compare & pull request”**.
 3. Add a **title** and **description** for your PR.
 4. Click **“Create Pull Request”**.
 
- **Congratulations!** You’ve made your first open-source contribution!
+🎉 **Congratulations!** You’ve made your first open-source contribution!
 
 🧭 Need help? Follow these official GitHub guides:
 
@@ -140,7 +138,7 @@ git push origin add-my-profile
 
 ---
 
-##  Tips for Contributors
+## 💡 Tips for Contributors
 
 * Always pull the latest changes before starting new work:
 
@@ -148,26 +146,29 @@ git push origin add-my-profile
   git checkout main
   git pull upstream main
   ```
+
 * Keep each branch focused on a single task.
+
 * Don’t commit unnecessary files or dependencies.
+
 * Be kind, respectful, and help others — open source is a team effort.
 
 ---
 
-## Common Issues
+## 🧑‍💻 Common Issues
 
-** My branch is outdated**
+**❓ My branch is outdated**
 
 ```bash
 git fetch upstream
 git merge upstream/main
 ```
 
-** My PR shows unrelated commits**
+**❓ My PR shows unrelated commits**
 
 > Make sure you’re branching from the latest `main`.
 
-** I messed up my branch**
+**❓ I messed up my branch**
 
 ```bash
 git checkout main
@@ -177,27 +178,12 @@ git checkout -b add-my-profile
 
 ---
 
-##  Useful Resources
+## 🧭 Useful Resources
 
 * [How to Fork and Clone a Repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 * [Creating a Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests)
 * [Git Cheat Sheet (PDF)](https://education.github.com/git-cheat-sheet-education.pdf)
 
----
-
-##  Maintainers’ Message
-
-We’re excited to have you here!
-Open source is about learning by doing — don’t be afraid to make mistakes.
-Ask questions, explore, and most importantly, **have fun while contributing** 
-
-> *“The best way to learn GitHub is to use it.”*
-> — **Open Source Club Organizers**
-
----
-
 
 ```
-
-
 ```
