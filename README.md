@@ -1,5 +1,5 @@
 
-````markdown
+```markdown
 # 🌸 Open Source Interested Club — Contribution Guide
 
 Welcome to the **Club Repository** 🎉  
@@ -30,7 +30,7 @@ Now bring your forked repo to your local machine:
 
 ```bash
 git clone https://github.com/<your-username>/<repo-name>.git
-````
+```
 
 Move into the project folder:
 
