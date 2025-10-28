@@ -118,7 +118,7 @@ npm run dev
 
 ---
 
-###  5. Make your changes
+###  6. Make your changes
 
 Now open the project in your code editor (like VS Code):
 
@@ -140,7 +140,7 @@ git status
 
 ---
 
-###  6. Stage and commit your changes
+###  7. Stage and commit your changes
 
 Add your changes:
 
@@ -156,7 +156,7 @@ git commit -m "Added my profile card (Your Name)"
 
 ---
 
-###  7. Push your branch to your fork
+###  8. Push your branch to your fork
 
 Now push the branch to your forked repository:
 
@@ -166,7 +166,7 @@ git push origin add-my-profile
 
 ---
 
-###  8. Create a Pull Request (PR)
+###  9. Create a Pull Request (PR)
 
 1. Go to your fork on GitHub.
 2. Click **“Compare & pull request”**.
