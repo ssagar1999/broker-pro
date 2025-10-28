@@ -1,3 +1,30 @@
+#  Open Source Interested Club — Contribution Guide
+
+---
+
+##  Getting Started
+
+Follow these steps carefully to contribute to this project.  
+Don’t worry — if you’re new to open source, this will be your perfect first PR!
+
+---
+
+###  1. Fork this repository
+
+- Click the **Fork** button (top-right corner of this repo).  
+- This creates a copy of the repository in **your own GitHub account**.
+
+Your forked repo URL will look like this:  
+`https://github.com/<your-username>/<repo-name>`
+
+---
+
+###  2. Clone your fork
+
+Now bring your forked repo to your local machine:
+
+```bash
+git clone https://github.com/<your-username>/<repo-name>.git
 
 
 Move into the project folder:
@@ -8,7 +35,7 @@ cd <repo-name>
 
 ---
 
-### 🔗 3. Add the original repo as upstream (important)
+###  3. Add the original repo as upstream (important)
 
 This keeps your fork updated with the latest changes from the main project.
 
@@ -26,7 +53,7 @@ You should see two remotes — `origin` (your fork) and `upstream` (main repo).
 
 ---
 
-### 🌱 4. Create a new branch
+###  4. Create a new branch
 
 Before making any changes, create a new branch:
 
@@ -42,7 +69,7 @@ Use meaningful branch names such as:
 
 ---
 
-### ✏️ 5. Make your changes
+###  5. Make your changes
 
 Now open the project in your code editor (like VS Code):
 
@@ -64,7 +91,7 @@ git status
 
 ---
 
-### 💾 6. Stage and commit your changes
+###  6. Stage and commit your changes
 
 Add your changes:
 
@@ -80,7 +107,7 @@ git commit -m "Added my profile card (Your Name)"
 
 ---
 
-### 🚀 7. Push your branch to your fork
+###  7. Push your branch to your fork
 
 Now push the branch to your forked repository:
 
@@ -90,14 +117,14 @@ git push origin add-my-profile
 
 ---
 
-### 🪄 8. Create a Pull Request (PR)
+###  8. Create a Pull Request (PR)
 
 1. Go to your fork on GitHub.
 2. Click **“Compare & pull request”**.
 3. Add a **title** and **description** for your PR.
 4. Click **“Create Pull Request”**.
 
-🎉 **Congratulations!** You’ve made your first open-source contribution!
+ **Congratulations!** You’ve made your first open-source contribution!
 
 🧭 Need help? Follow these official GitHub guides:
 
@@ -106,7 +133,7 @@ git push origin add-my-profile
 
 ---
 
-## 💡 Tips for Contributors
+##  Tips for Contributors
 
 * Always pull the latest changes before starting new work:
 
@@ -123,20 +150,20 @@ git push origin add-my-profile
 
 ---
 
-## 🧑‍💻 Common Issues
+##  Common Issues
 
-**❓ My branch is outdated**
+** My branch is outdated**
 
 ```bash
 git fetch upstream
 git merge upstream/main
 ```
 
-**❓ My PR shows unrelated commits**
+** My PR shows unrelated commits**
 
 > Make sure you’re branching from the latest `main`.
 
-**❓ I messed up my branch**
+** I messed up my branch**
 
 ```bash
 git checkout main
@@ -146,7 +173,7 @@ git checkout -b add-my-profile
 
 ---
 
-## 🧭 Useful Resources
+##  Useful Resources
 
 * [How to Fork and Clone a Repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 * [Creating a Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests)
