@@ -39,9 +39,7 @@ export function PropertyCard({ item, isFavorite, onToggleFavorite, onDelete }: P
 
         {/* Status */}
         <div className="absolute left-3 top-3">
-          <Badge className={getStatusBadgeStyles(item.status)} variant="secondary">
-            <span className="capitalize">{item.status}</span>
-          </Badge>
+ 
         </div>
       </div>
 

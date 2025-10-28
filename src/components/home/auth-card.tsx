@@ -49,6 +49,14 @@ export function AuthCard() {
           error: toastMessages.loginError,
         }
       );
+      const respons = await toastUtils.promise(
+        loginUser(formData),
+        {
+          loading: 'Signing you in...',
+          success: toastMessages.loginSuccess,
+          error: toastMessages.loginError,
+        }
+      );
       
       console.log("Login response:", response);
       
