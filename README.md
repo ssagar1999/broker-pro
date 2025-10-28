@@ -106,6 +106,18 @@ Use meaningful branch names such as:
 
 ---
 
+###  5. Run The Project
+
+
+```bash
+npm install
+npm run dev
+```
+
+
+
+---
+
 ###  5. Make your changes
 
 Now open the project in your code editor (like VS Code):
