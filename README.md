@@ -4,6 +4,43 @@
 
 ##  Getting Started
 
+# 🧰 Project Setup Guide – Frontend (Next.js)
+
+Welcome! Follow the steps below to set up this project on your local system.  
+This guide ensures you have the same environment as used during development.
+
+---
+
+## 🚀 1. Prerequisites
+
+Before starting, make sure the following tools are installed on your machine:
+
+| Tool | Required Version | Download Link |
+|------|------------------|----------------|
+| **Node.js** | v22.15.1 | [Download Node.js](https://nodejs.org/en/download) |
+| **npm** | (comes with Node.js) | — |
+| **Git** | Latest | [Download Git](https://git-scm.com/downloads) |
+| **VS Code** | Recommended | [Download VS Code](https://code.visualstudio.com/) |
+
+---
+
+## 🧩 2. Verify Installation
+
+Open your terminal and check versions:
+
+```bash
+node -v
+# Expected output: v22.15.1
+
+npm -v
+# Should show a version number (≥10)
+
+git --version
+# Should show a version number
+```
+
+
+
 Follow these steps carefully to contribute to this project.  
 Don’t worry — if you’re new to open source, this will be your perfect first PR!
 
