@@ -104,6 +104,7 @@ export default function PropertiesPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="mb-2 text-balance text-3xl font-bold">Properties</h1>
+              
               <p className="text-muted-foreground">
                 {pagination ? (
                   <>Showing {properties.length} of {pagination.totalCount} properties
