@@ -8,6 +8,10 @@ import type { Property } from "@/lib/api/types"
 import { formatDate, formatPrice, getStatusBadgeStyles } from "../../lib/utils"
 import { useRouter } from "next/navigation"
 import { Modal } from "@/components/modal/modal";
+// ✅ add this just below the imports
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css"
 
 type Props = {
   item: Property
@@ -19,15 +23,39 @@ type Props = {
 export function PropertyCard({ item, isFavorite, onToggleFavorite, onDelete }: Props) {
   const image = item.images?.[0] || "/modern-house-exterior.png";
   let router = useRouter();
+  const settings = {
+  dots: true,
+  infinite: true,
+  speed: 400,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  arrows: true,
+};
+
 
   return (
     <Card className="group relative overflow-hidden transition-shadow hover:shadow-lg">
-      <div
-        style={{ backgroundImage: `url(${image})` }}
-        className="relative aspect-[4/3] bg-cover bg-center"
-        role="img"
-        aria-label={`Image for ${item?.owner?.name || "property"}`}
-      >
+    <div className="relative aspect-[4/3]">
+  {item.images?.length > 1 ? (
+    <Slider {...settings}>
+      {item.images.map((img: string, index: number) => (
+        <div key={index}>
+          <img
+            src={img}
+            alt={`Property ${index + 1}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ))}
+    </Slider>
+  ) : (
+    <img
+      src={image}
+      alt={item?.owner?.name || "Property"}
+      className="w-full h-full object-cover"
+    />
+  )}
+
         {/* Favorite */}
         <button
           onClick={() => onToggleFavorite(item._id)}
