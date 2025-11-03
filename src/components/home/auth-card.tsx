@@ -121,6 +121,7 @@ export function AuthCard() {
             value={form.password}
             aria-required="true"
           />
+          <div>hi im coding</div>
           <div className="text-right">
             <Link href="/forgot-password" className="text-xs text-muted-foreground hover:underline">
               Forgot password?
