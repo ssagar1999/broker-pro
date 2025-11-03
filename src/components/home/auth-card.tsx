@@ -49,15 +49,6 @@ export function AuthCard() {
           error: toastMessages.loginError,
         }
       );
-      const respons = await toastUtils.promise(
-        loginUser(formData),
-        {
-          loading: 'Signing you in...',
-          success: toastMessages.loginSuccess,
-          error: toastMessages.loginError,
-        }
-      );
-      
       console.log("Login response:", response);
       
       // Use the login function from userStore
@@ -121,6 +112,7 @@ export function AuthCard() {
             value={form.password}
             aria-required="true"
           />
+
           <div className="text-right">
             <Link href="/forgot-password" className="text-xs text-muted-foreground hover:underline">
               Forgot password?
