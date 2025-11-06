@@ -74,7 +74,7 @@ export function AuthCard() {
       }
       
       setError(errorMessage);
-      toastUtils.error(errorMessage);
+      
     } finally {
       setLoading(false);
     }
