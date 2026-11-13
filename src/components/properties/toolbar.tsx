@@ -5,6 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useEffect, useRef, useState } from "react"
+import { useDebounce } from "@/hooks/use-debounce"
+
+// How long to wait after the last keystroke before searching
+const SEARCH_DEBOUNCE_MS = 500
 
 type Props = {
   searchQuery: string
@@ -23,6 +28,37 @@ export function Toolbar({
   activeFilterCount,
   onOpenFilters,
 }: Props) {
+  // What the user is typing right now (updates on every keystroke)
+  const [inputValue, setInputValue] = useState(searchQuery)
+  // Same value, but only updates once typing has paused
+  const debouncedInput = useDebounce(inputValue, SEARCH_DEBOUNCE_MS)
+  // Last query we know the store has, so we never send it twice
+  const lastSentQuery = useRef(searchQuery)
+
+  // If the query is changed from outside (e.g. "Clear all filters", or restored
+  // from localStorage), show it in the input without re-sending it.
+  useEffect(() => {
+    if (searchQuery !== lastSentQuery.current) {
+      lastSentQuery.current = searchQuery
+      setInputValue(searchQuery)
+    }
+  }, [searchQuery])
+
+  // Keep the latest callback in a ref so the effect below runs only when the
+  // debounced value changes — never because the parent re-rendered.
+  const onSearchQueryChangeRef = useRef(onSearchQueryChange)
+  useEffect(() => {
+    onSearchQueryChangeRef.current = onSearchQueryChange
+  }, [onSearchQueryChange])
+
+  // Only the settled value reaches the store, which is what triggers the API call
+  useEffect(() => {
+    if (debouncedInput !== lastSentQuery.current) {
+      lastSentQuery.current = debouncedInput
+      onSearchQueryChangeRef.current(debouncedInput)
+    }
+  }, [debouncedInput])
+
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       {/* Search Input */}
@@ -30,8 +66,8 @@ export function Toolbar({
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search by client, location, or property type..."
-          value={searchQuery}
-          onChange={(e) => onSearchQueryChange(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           className="pl-10 h-11 bg-background border-border focus:border-primary transition-colors"
         />
       </div>
